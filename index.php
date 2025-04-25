@@ -29,5 +29,8 @@ if (isset($_SESSION['user_id'])) {
 // Передаем аватар в HTML
 $GLOBALS['current_avatar'] = $avatar;
 
+
+
+
 include 'index.html';
 ?>
