@@ -3,16 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Смартфони | TechWish</title>
+    <title>Побутова техніка | TechWish</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --primary: #0066cc;
-            --secondary: #00ccff;
-            --accent: #ff3366;
-            --light-bg: #f5f7fa;
-            --dark-text: #333;
-            --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            --primary: #2196F3;
+            --primary-dark: #1976D2;
+            --primary-light: #BBDEFB;
+            --secondary: #E3F2FD;
+            --accent: #64B5F6;
+            --light-bg: #f8f9fa;
+            --dark-text: #0D47A1;
+            --light-text: #E3F2FD;
+            --card-shadow: 0 4px 12px rgba(33, 150, 243, 0.1);
         }
         
         body {
@@ -20,7 +23,8 @@
             margin: 0;
             padding: 0;
             background-color: var(--light-bg);
-            color: var(--dark-text);
+            color: #333;
+            line-height: 1.6;
         }
         
         header {
@@ -52,21 +56,7 @@
         }
         
         .logo-icon {
-            color: var(--accent);
-        }
-        
-        .user-profile {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .user-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 2px solid var(--secondary);
+            color: #ff0000; /* Червоний колір */
         }
         
         .main-container {
@@ -78,7 +68,7 @@
         }
         
         .filters-column {
-            width: 250px;
+            width: 280px;
             flex-shrink: 0;
             position: sticky;
             top: 80px;
@@ -93,10 +83,11 @@
         
         .page-title {
             color: var(--primary);
-            margin-bottom: 30px;
+            margin-bottom: 20px;
             display: flex;
             align-items: center;
             gap: 10px;
+            font-size: 28px;
         }
         
         .filters-container {
@@ -108,25 +99,39 @@
         
         .filter-section {
             margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .filter-section:last-child {
+            border-bottom: none;
         }
         
         .filter-section h3 {
-            margin-bottom: 10px;
+            margin-bottom: 15px;
             color: var(--primary);
             font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
         
         .filter-options {
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 10px;
         }
         
         .filter-checkbox {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
             font-size: 14px;
+            cursor: pointer;
+        }
+        
+        .filter-checkbox input {
+            cursor: pointer;
         }
         
         .price-range {
@@ -136,24 +141,31 @@
         
         .price-range input {
             width: 100%;
-            padding: 8px;
+            padding: 8px 12px;
             border: 1px solid #ddd;
-            border-radius: 4px;
+            border-radius: 6px;
             font-size: 14px;
         }
         
         .sorting {
             display: flex;
-            justify-content: flex-end;
+            justify-content: space-between;
+            align-items: center;
             margin-bottom: 20px;
+        }
+        
+        .results-count {
+            font-size: 14px;
+            color: #666;
         }
         
         .sort-select {
             padding: 8px 12px;
             border: 1px solid #ddd;
-            border-radius: 4px;
+            border-radius: 6px;
             background: white;
             font-size: 14px;
+            cursor: pointer;
         }
         
         .products-grid {
@@ -168,24 +180,36 @@
             overflow: hidden;
             box-shadow: var(--card-shadow);
             transition: transform 0.3s, box-shadow 0.3s;
+            display: flex;
+            flex-direction: column;
         }
         
         .product-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+            box-shadow: 0 8px 20px rgba(33, 150, 243, 0.15);
+        }
+        
+        .product-image-container {
+            position: relative;
+            padding-top: 100%;
+            background: #f9f9f9;
         }
         
         .product-image {
+            position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
-            height: 200px;
+            height: 100%;
             object-fit: contain;
-            background: #f9f9f9;
             padding: 20px;
-            border-bottom: 1px solid #eee;
         }
         
         .product-info {
             padding: 20px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
         }
         
         .product-brand {
@@ -197,35 +221,38 @@
         .product-name {
             font-weight: bold;
             margin-bottom: 10px;
-            font-size: 18px;
-            height: 45px;
-            overflow: hidden;
+            font-size: 16px;
+            flex-grow: 1;
         }
         
         .product-specs {
             display: flex;
-            gap: 15px;
-            margin-bottom: 10px;
-            font-size: 14px;
-            color: #666;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 15px;
+            font-size: 13px;
         }
         
         .product-spec {
             display: flex;
             align-items: center;
             gap: 5px;
+            background: #f5f5f5;
+            padding: 4px 10px;
+            border-radius: 12px;
         }
         
         .product-price {
             color: var(--primary);
             font-weight: bold;
             font-size: 20px;
-            margin: 15px 0;
+            margin: 10px 0 15px;
         }
         
         .product-actions {
             display: flex;
             gap: 10px;
+            margin-top: auto;
         }
         
         .btn {
@@ -251,7 +278,7 @@
         }
         
         .btn-primary:hover {
-            background: #0055aa;
+            background: var(--primary-dark);
         }
         
         .btn-outline {
@@ -261,14 +288,15 @@
         }
         
         .btn-outline:hover {
-            background: #f0f7ff;
+            background: var(--secondary);
         }
         
         .pagination {
             display: flex;
             justify-content: center;
-            gap: 10px;
+            gap: 8px;
             margin-top: 40px;
+            flex-wrap: wrap;
         }
         
         .pagination a {
@@ -279,6 +307,8 @@
             text-decoration: none;
             border: 1px solid #ddd;
             font-size: 14px;
+            min-width: 40px;
+            text-align: center;
         }
         
         .pagination a.active {
@@ -290,7 +320,7 @@
         footer {
             background: var(--dark-text);
             color: white;
-            padding: 30px 0;
+            padding: 40px 0 20px;
             margin-top: 50px;
         }
         
@@ -304,16 +334,18 @@
         }
         
         .footer-section h3 {
-            color: var(--secondary);
+            color: var(--light-text);
             margin-bottom: 15px;
+            font-size: 18px;
         }
         
         .footer-section a {
-            color: #ccc;
+            color: #BBDEFB;
             display: block;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
             text-decoration: none;
             font-size: 14px;
+            transition: color 0.3s;
         }
         
         .footer-section a:hover {
@@ -323,9 +355,21 @@
         .no-results {
             text-align: center;
             grid-column: 1 / -1;
-            padding: 40px;
+            padding: 60px 20px;
             color: #666;
         }
+        
+        .no-results i {
+            font-size: 48px;
+            margin-bottom: 20px;
+            color: #ccc;
+        }
+        
+        .no-results h3 {
+            margin-bottom: 10px;
+            color: #444;
+        }
+        
         .menu {
             position: relative;
             display: inline-block;
@@ -352,7 +396,7 @@
             display: flex;
             align-items: center;
             padding: 12px 16px;
-            color: var(--dark-text);
+            color: #333;
             text-decoration: none;
             transition: all 0.3s;
             gap: 10px;
@@ -360,7 +404,7 @@
         }
         
         .dropdown a:hover {
-            background: var(--light-bg);
+            background: var(--secondary);
             color: var(--primary);
         }
         
@@ -374,13 +418,13 @@
             align-items: center;
             gap: 10px;
             cursor: pointer;
-            padding: 5px 10px;
+            padding: 8px 12px;
             border-radius: 20px;
             transition: all 0.3s;
         }
         
         .user-profile:hover {
-            background: rgba(0,0,0,0.05);
+            background: rgba(33, 150, 243, 0.1);
         }
         
         .user-avatar {
@@ -404,7 +448,7 @@
         }
         
         .auth-btn:hover {
-            background: rgba(0,102,204,0.1);
+            background: rgba(33, 150, 243, 0.1);
         }
         
         .filter-btn {
@@ -416,6 +460,49 @@
             border-radius: 6px;
             margin-bottom: 20px;
             cursor: pointer;
+            width: 100%;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .filter-reset {
+            display: block;
+            text-align: center;
+            margin-top: 15px;
+            color: var(--primary);
+            font-size: 14px;
+        }
+        
+        .social-links {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .social-links a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.1);
+            color: white;
+            transition: all 0.3s;
+        }
+        
+        .social-links a:hover {
+            background: var(--light-text);
+            color: var(--dark-text);
+        }
+        
+        .copyright {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            font-size: 13px;
+            color: #BBDEFB;
         }
         
         @media (max-width: 992px) {
@@ -431,7 +518,7 @@
             }
             
             .filter-btn {
-                display: block;
+                display: flex;
             }
             
             .filters-container {
@@ -441,107 +528,98 @@
             .filters-container.visible {
                 display: block;
             }
+            
+            .sorting {
+                flex-direction: column;
+                gap: 15px;
+                align-items: flex-start;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .products-grid {
+                grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            }
+            
+            .price-range {
+                flex-direction: column;
+            }
+            
+            nav {
+                flex-wrap: wrap;
+                gap: 15px;
+            }
+            
+            .logo {
+                order: 1;
+            }
+            
+            .auth-buttons {
+                order: 3;
+                width: 100%;
+                justify-content: center;
+            }
+            
+            .search {
+                order: 2;
+                width: 100%;
+            }
         }
     </style>
 </head>
 <body>
-    <header>
-        <nav>
-            <a href="/" class="logo">
-                <i class="fas fa-heart logo-icon"></i>
-                <span>TechWish</span>
-            </a>
-            <div class="auth-buttons">
-                <?php if(isset($_SESSION['user_id'])): ?>
-                    <div class="menu">
-                        <div class="user-profile">
-                        <img src="/<?php echo $avatar; ?>" alt="Аватар" class="user-avatar">                             
-                        <span><?php echo htmlspecialchars($_SESSION['username']); ?></span>
-                    </div>
-                        <div class="dropdown profile-dropdown">
-                            <a href="/profile.php">
-                                <i class="fas fa-user-circle"></i>
-                                <span>Профіль</span>
-                            </a>
-                            <a href="/wishlist.php">
-                                <i class="fas fa-heart"></i>
-                                <span>Вишлист</span>
-                            </a>
-                            <a href="/logout.php">
-                                <i class="fas fa-sign-out-alt"></i>
-                                <span>Вийти</span>
-                            </a>
-                        </div>
-                    </div>
-                <?php else: ?>
-                    <a href="/login.php" class="auth-btn">
-                        <i class="fas fa-sign-in-alt"></i>
-                        <span>Увійти</span>
-                    </a>
-                    <a href="/register.php" class="auth-btn">
-                        <i class="fas fa-user-plus"></i>
-                        <span>Реєстрація</span>
-                    </a>
-                <?php endif; ?>
-            </div>
-        </nav>
-    </header>
-
+<?php include('header.html'); ?>
     <div class="main-container">
         <div class="filters-column">
             <button class="filter-btn" id="filterToggle">
                 <i class="fas fa-filter"></i> Фільтри
             </button>
             
-            <form method="get" action="smartphones.php" class="filters-container" id="filtersForm">
+            <form method="get" action="homecomfort.php" class="filters-container" id="filtersForm">
                 <div class="filter-section">
-                    <h3>Бренди</h3>
+                    <h3><i class="fas fa-list"></i> Категорії</h3>
                     <div class="filter-options">
-                        <?php 
-                        $brands = ['Apple', 'Samsung', 'Xiaomi', 'Huawei', 'OnePlus', 'Realme', 'Oppo', 'Vivo', 'Google', 'Asus', 'Motorola', 'Infinix', 'Tecno', 'Lava', 'Itel'];
-                        foreach ($brands as $br): ?>
+                        <?php foreach ($categories as $cat): ?>
                             <label class="filter-checkbox">
-                                <input type="checkbox" name="brand[]" value="<?php echo $br; ?>" 
-                                    <?php echo (isset($_GET['brand']) && in_array($br, $_GET['brand'])) ? 'checked' : ''; ?>>
-                                <?php echo $br; ?>
+                                <input type="checkbox" name="category[]" value="<?php echo $cat; ?>" 
+                                    <?php echo in_array($cat, $selectedCategories) ? 'checked' : ''; ?>>
+                                <?php echo $cat; ?>
                             </label>
                         <?php endforeach; ?>
                     </div>
                 </div>
                 
                 <div class="filter-section">
-                    <h3>Ціна</h3>
+                    <h3><i class="fas fa-tag"></i> Ціна</h3>
                     <div class="price-range">
-                        <input type="number" name="price_min" placeholder="Від" value="<?php echo isset($_GET['price_min']) ? $_GET['price_min'] : ''; ?>">
-                        <input type="number" name="price_max" placeholder="До" value="<?php echo isset($_GET['price_max']) ? $_GET['price_max'] : ''; ?>">
+                        <input type="number" name="price_min" placeholder="Від" 
+                               value="<?php echo $price_min !== null ? $price_min : ''; ?>">
+                        <input type="number" name="price_max" placeholder="До" 
+                               value="<?php echo $price_max !== null ? $price_max : ''; ?>">
                     </div>
                 </div>
                 
                 <div class="filter-section">
-                    <h3>Оперативна пам'ять</h3>
+                    <h3><i class="fas fa-industry"></i> Бренди</h3>
                     <div class="filter-options">
-                        <?php 
-                        $rams = [2, 3, 4, 6, 8, 12, 16];
-                        foreach ($rams as $r): ?>
+                        <?php foreach ($brands as $brand): ?>
                             <label class="filter-checkbox">
-                                <input type="checkbox" name="ram[]" value="<?php echo $r; ?>" 
-                                    <?php echo (isset($_GET['ram']) && in_array($r, $_GET['ram'])) ? 'checked' : ''; ?>>
-                                <?php echo $r; ?> ГБ
+                                <input type="checkbox" name="brand[]" value="<?php echo $brand; ?>" 
+                                    <?php echo in_array($brand, $selectedBrands) ? 'checked' : ''; ?>>
+                                <?php echo $brand; ?>
                             </label>
                         <?php endforeach; ?>
                     </div>
                 </div>
                 
                 <div class="filter-section">
-                    <h3>Вбудована пам'ять</h3>
+                    <h3><i class="fas fa-bolt"></i> Потужність</h3>
                     <div class="filter-options">
-                        <?php 
-                        $storages = [32, 64, 128, 256, 512, 1024];
-                        foreach ($storages as $s): ?>
+                        <?php foreach ($powers as $power): ?>
                             <label class="filter-checkbox">
-                                <input type="checkbox" name="storage[]" value="<?php echo $s; ?>" 
-                                    <?php echo (isset($_GET['storage']) && in_array($s, $_GET['storage'])) ? 'checked' : ''; ?>>
-                                <?php echo $s; ?> ГБ
+                                <input type="checkbox" name="power[]" value="<?php echo $power; ?>" 
+                                    <?php echo in_array($power, $selectedPowers) ? 'checked' : ''; ?>>
+                                <?php echo $power; ?>
                             </label>
                         <?php endforeach; ?>
                     </div>
@@ -549,10 +627,10 @@
                 
                 <div class="filter-section">
                     <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-filter"></i> Фільтрувати
+                        <i class="fas fa-filter"></i> Застосувати фільтри
                     </button>
-                    <a href="smartphones.php" class="btn btn-outline" style="margin-top: 10px;">
-                        <i class="fas fa-times"></i> Скинути
+                    <a href="homecomfort.php" class="filter-reset">
+                        <i class="fas fa-times"></i> Скинути всі фільтри
                     </a>
                 </div>
             </form>
@@ -560,41 +638,64 @@
         
         <div class="products-column">
             <h1 class="page-title">
-                <i class="fas fa-mobile-alt"></i>
-                <span>Смартфони</span>
+                <i class="fas fa-plug"></i>
+                <span>Побутова техніка</span>
             </h1>
             
             <div class="sorting">
+                <div class="results-count">
+                    Знайдено товарів: <?php echo $total_products; ?>
+                </div>
                 <select name="sort" class="sort-select" onchange="window.location.href=this.value">
-                    <option value="smartphones.php?sort=newest" <?php echo (isset($_GET['sort']) && $_GET['sort'] === 'newest') ? 'selected' : ''; ?>>Новітні</option>
-                    <option value="smartphones.php?sort=price_asc" <?php echo (isset($_GET['sort']) && $_GET['sort'] === 'price_asc') ? 'selected' : ''; ?>>Від дешевих</option>
-                    <option value="smartphones.php?sort=price_desc" <?php echo (isset($_GET['sort']) && $_GET['sort'] === 'price_desc') ? 'selected' : ''; ?>>Від дорогих</option>
-                    <option value="smartphones.php?sort=popular" <?php echo (isset($_GET['sort']) && $_GET['sort'] === 'popular') ? 'selected' : ''; ?>>Популярні</option>
+                    <option value="homecomfort.php?<?php echo http_build_query(array_merge($_GET, ['sort' => 'newest'])); ?>" 
+                        <?php echo $sort === 'newest' ? 'selected' : ''; ?>>Новітні</option>
+                    <option value="homecomfort.php?<?php echo http_build_query(array_merge($_GET, ['sort' => 'price_asc'])); ?>" 
+                        <?php echo $sort === 'price_asc' ? 'selected' : ''; ?>>Від дешевих</option>
+                    <option value="homecomfort.php?<?php echo http_build_query(array_merge($_GET, ['sort' => 'price_desc'])); ?>" 
+                        <?php echo $sort === 'price_desc' ? 'selected' : ''; ?>>Від дорогих</option>
+                    <option value="homecomfort.php?<?php echo http_build_query(array_merge($_GET, ['sort' => 'popular'])); ?>" 
+                        <?php echo $sort === 'popular' ? 'selected' : ''; ?>>Популярні</option>
                 </select>
             </div>
             
             <div class="products-grid">
                 <?php if (empty($products)): ?>
                     <div class="no-results">
-                        <i class="fas fa-search" style="font-size: 48px; margin-bottom: 20px;"></i>
+                        <i class="fas fa-search"></i>
                         <h3>Нічого не знайдено</h3>
                         <p>Спробуйте змінити параметри фільтрації</p>
+                        <a href="homecomfort.php" class="btn btn-primary" style="margin-top: 20px;">
+                            Показати всі товари
+                        </a>
                     </div>
                 <?php else: ?>
                     <?php foreach ($products as $product): ?>
                         <div class="product-card">
-                            <img src="<?php echo htmlspecialchars($product['image_url']); ?>" alt="<?php echo htmlspecialchars($product['name']); ?>" class="product-image">
+                            <div class="product-image-container">
+                                <img src="<?php echo htmlspecialchars($product['image_url']); ?>" 
+                                     alt="<?php echo htmlspecialchars($product['name']); ?>" 
+                                     class="product-image">
+                            </div>
                             <div class="product-info">
                                 <div class="product-brand"><?php echo htmlspecialchars($product['brand']); ?></div>
                                 <h3 class="product-name"><?php echo htmlspecialchars($product['name']); ?></h3>
                                 
                                 <div class="product-specs">
                                     <span class="product-spec">
-                                        <i class="fas fa-memory"></i> <?php echo htmlspecialchars($product['ram']); ?> ГБ
+                                        <i class="fas fa-box"></i> <?php echo htmlspecialchars($product['category']); ?>
                                     </span>
+                                    
+                                    <?php if (!empty($product['power'])): ?>
                                     <span class="product-spec">
-                                        <i class="fas fa-hdd"></i> <?php echo htmlspecialchars($product['storage']); ?> ГБ
+                                        <i class="fas fa-bolt"></i> <?php echo htmlspecialchars($product['power']); ?>
                                     </span>
+                                    <?php endif; ?>
+                                    
+                                    <?php if (!empty($product['dimensions'])): ?>
+                                    <span class="product-spec">
+                                        <i class="fas fa-ruler-combined"></i> <?php echo htmlspecialchars($product['dimensions']); ?>
+                                    </span>
+                                    <?php endif; ?>
                                 </div>
                                 
                                 <div class="product-price"><?php echo number_format($product['price'], 0, '', ' '); ?> ₴</div>
@@ -603,7 +704,7 @@
                                         <i class="far fa-heart"></i>
                                     </a>
                                     <a href="cart.php?action=add&id=<?php echo $product['id']; ?>" class="btn btn-primary">
-                                        <i class="fas fa-cart-plus"></i>
+                                        <i class="fas fa-cart-plus"></i> Купити
                                     </a>
                                 </div>
                             </div>
@@ -612,30 +713,38 @@
                 <?php endif; ?>
             </div>
             
+            <?php if ($total_products > $per_page): ?>
             <div class="pagination">
-                <?php
-                $total_pages = ceil($total_products / 10); // Предполагаем, что $total_products содержит общее количество товаров
-                $current_page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
-                $query_string = $_GET;
+                <?php if ($page > 1): ?>
+                    <a href="<?php echo 'homecomfort.php?' . http_build_query(array_merge($_GET, ['page' => 1])); ?>">
+                        &laquo;&laquo;
+                    </a>
+                    <a href="<?php echo 'homecomfort.php?' . http_build_query(array_merge($_GET, ['page' => $page - 1])); ?>">
+                        &laquo;
+                    </a>
+                <?php endif; ?>
                 
-                // Удаляем page из query string чтобы добавить его заново
-                unset($query_string['page']);
-                $base_url = 'smartphones.php?' . http_build_query($query_string);
+                <?php 
+                $start = max(1, $page - 2);
+                $end = min($start + 4, ceil($total_products / $per_page));
                 
-                if ($total_pages > 1): ?>
-                    <?php if ($current_page > 1): ?>
-                        <a href="<?php echo $base_url . '&page=' . ($current_page - 1); ?>">&laquo;</a>
-                    <?php endif; ?>
-                    
-                    <?php for ($i = 1; $i <= $total_pages; $i++): ?>
-                        <a href="<?php echo $base_url . '&page=' . $i; ?>" <?php echo $i == $current_page ? 'class="active"' : ''; ?>><?php echo $i; ?></a>
-                    <?php endfor; ?>
-                    
-                    <?php if ($current_page < $total_pages): ?>
-                        <a href="<?php echo $base_url . '&page=' . ($current_page + 1); ?>">&raquo;</a>
-                    <?php endif; ?>
+                for ($i = $start; $i <= $end; $i++): ?>
+                    <a href="<?php echo 'homecomfort.php?' . http_build_query(array_merge($_GET, ['page' => $i])); ?>" 
+                       <?php echo $i == $page ? 'class="active"' : ''; ?>>
+                        <?php echo $i; ?>
+                    </a>
+                <?php endfor; ?>
+                
+                <?php if ($page < ceil($total_products / $per_page)): ?>
+                    <a href="<?php echo 'homecomfort.php?' . http_build_query(array_merge($_GET, ['page' => $page + 1])); ?>">
+                        &raquo;
+                    </a>
+                    <a href="<?php echo 'homecomfort.php?' . http_build_query(array_merge($_GET, ['page' => ceil($total_products / $per_page)])); ?>">
+                        &raquo;&raquo;
+                    </a>
                 <?php endif; ?>
             </div>
+            <?php endif; ?>
         </div>
     </div>
 
@@ -643,10 +752,11 @@
         <div class="footer-content">
             <div class="footer-section">
                 <h3>Каталог</h3>
-                <a href="smartphones.php">Смартфони</a>
-                <a href="#">Ноутбуки</a>
-                <a href="#">Планшети</a>
-                <a href="#">Навушники</a>
+                <a href="homecomfort.php">Вся техніка</a>
+                <a href="homecomfort.php?category=Пилососи">Пилососи</a>
+                <a href="homecomfort.php?category=Пральні машини">Пральні машини</a>
+                <a href="homecomfort.php?category=Холодильники">Холодильники</a>
+                <a href="homecomfort.php?category=Плити">Плити</a>
             </div>
             
             <div class="footer-section">
@@ -654,15 +764,17 @@
                 <a href="#">Доставка і оплата</a>
                 <a href="#">Гарантія</a>
                 <a href="#">Повернення</a>
+                <a href="#">Сервісні центри</a>
                 <a href="#">Кредит</a>
             </div>
             
             <div class="footer-section">
-                <h3>Про нас</h3>
-                <a href="#">Про компанію</a>
+                <h3>Компанія</h3>
+                <a href="#">Про нас</a>
                 <a href="#">Контакти</a>
                 <a href="#">Вакансії</a>
                 <a href="#">Блог</a>
+                <a href="#">Партнерам</a>
             </div>
             
             <div class="footer-section">
@@ -670,7 +782,18 @@
                 <a href="#"><i class="fas fa-phone"></i> 0 800 123 456</a>
                 <a href="#"><i class="fas fa-envelope"></i> info@techwish.ua</a>
                 <a href="#"><i class="fas fa-map-marker-alt"></i> Київ, вул. Технічна 15</a>
+                
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-telegram"></i></a>
+                    <a href="#"><i class="fab fa-youtube"></i></a>
+                </div>
             </div>
+        </div>
+        
+        <div class="copyright">
+            &copy; 2023 TechWish. Всі права захищені.
         </div>
     </footer>
 
@@ -680,22 +803,34 @@
             document.getElementById('filtersForm').classList.toggle('visible');
         });
         
-        // Динамическое обновление URL при изменении сортировки
-        document.querySelector('.sort-select').addEventListener('change', function() {
-            window.location.href = this.value;
-        });
-        
-        // Обработка фильтров
+        // Validate price range
         document.querySelector('form').addEventListener('submit', function(e) {
-            // Можно добавить валидацию, например, что price_min <= price_max
-            if (document.querySelector('input[name="price_min"]').value && 
-                document.querySelector('input[name="price_max"]').value &&
-                parseFloat(document.querySelector('input[name="price_min"]').value) > 
-                parseFloat(document.querySelector('input[name="price_max"]').value)) {
+            const priceMin = document.querySelector('input[name="price_min"]');
+            const priceMax = document.querySelector('input[name="price_max"]');
+            
+            if (priceMin.value && priceMax.value && parseFloat(priceMin.value) > parseFloat(priceMax.value)) {
                 alert('Максимальна ціна повинна бути більше мінімальної');
                 e.preventDefault();
             }
         });
+        
+        // Preserve filters when sorting
+        document.querySelector('.sort-select').addEventListener('change', function() {
+            const url = new URL(this.value);
+            const params = new URLSearchParams(window.location.search);
+            
+            // Preserve all current filters
+            params.forEach((value, key) => {
+                if (key !== 'sort' && key !== 'page') {
+                    if (Array.isArray(value)) {
+                        value.forEach(v => url.searchParams.append(key, v));
+                    } else {
+                        url.searchParams.append(key, value);
+                    }
+                }
+            });
+            
+            window.location.href = url.toString();
+        });
     </script>
 </body>
-</html>

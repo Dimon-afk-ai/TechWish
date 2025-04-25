@@ -1,30 +1,11 @@
 <?php
 session_start();
-require_once __DIR__.'/../boot.php';
+require_once __DIR__.'/boot.php';
 
 // Инициализация переменной $error
 $error = '';
 
-// Устанавливаем аватар по умолчанию
-$avatar = 'default-avatar.jpg';
-if (isset($_SESSION['user_id'])) {
-    try {
-        // Получаем актуальные данные из БД
-        $stmt = $pdo->prepare("SELECT username, avatar FROM users WHERE id = ?");
-        $stmt->execute([$_SESSION['user_id']]);
-        $user = $stmt->fetch();
-        
-        if ($user) {
-            // Обновляем сессионные переменные
-            $_SESSION['username'] = $user['username'];
-            $_SESSION['user_nickname'] = $user['username'];
-            $avatar = !empty($user['avatar']) ? $user['avatar'] : 'default-avatar.jpg';
-        }
-    } catch (PDOException $e) {
-        $error = "Ошибка получения данных пользователя: " . $e->getMessage();
-        error_log($error);
-    }
-}
+include ('models/header.php');
 
 // Параметры фильтрации
 $brands = isset($_GET['brand']) ? (array)$_GET['brand'] : [];
@@ -158,5 +139,5 @@ $templateData = [
 ];
 
 extract($templateData);
-include 'smartphones.html';
+include 'views/smartphones.html';
 ?>

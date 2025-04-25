@@ -11,24 +11,7 @@ $error = '';
 $products = []; // Инициализация массива товаров
 $total_products = 0; // Инициализация общего количества товаров
 
-// Устанавливаем аватар по умолчанию
-$avatar = 'default-avatar.jpg';
-if (isset($_SESSION['user_id'])) {
-    try {
-        $stmt = $pdo->prepare("SELECT username, avatar FROM users WHERE id = ?");
-        $stmt->execute([$_SESSION['user_id']]);
-        $user = $stmt->fetch();
-        
-        if ($user) {
-            $_SESSION['username'] = $user['username'];
-            $_SESSION['user_nickname'] = $user['username'];
-            $avatar = !empty($user['avatar']) ? $user['avatar'] : 'default-avatar.jpg';
-        }
-    } catch (PDOException $e) {
-        $error = "Ошибка получения данных пользователя: " . $e->getMessage();
-        error_log($error);
-    }
-}
+include ('models/header.php');
 
 // Получаем параметры фильтрации (из GET или POST в зависимости от типа запроса)
 $requestData = $isAjax ? $_POST : $_GET;
@@ -268,5 +251,5 @@ if (!empty($error) && $_SERVER['REMOTE_ADDR'] == '127.0.0.1') {
     echo '</pre>';
 }
 extract($templateData);
-include 'homecomfort.html';
+include 'views/homecomfort.html';
 ?>
