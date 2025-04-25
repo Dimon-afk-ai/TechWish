@@ -137,6 +137,7 @@
             
             <div class="pagination">
                 <?php
+
                 $total_pages = ceil($total_products / 10); // Предполагаем, что $total_products содержит общее количество товаров
                 $current_page = isset($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
                 $query_string = $_GET;
