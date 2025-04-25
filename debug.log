@@ -1,0 +1,200 @@
+[2025-04-03 23:00:04] Attempting DB connection
+[2025-04-03 23:00:04] DB connected successfully
+[2025-04-03 23:00:04] Displaying registration form
+[2025-04-04 07:37:03] Attempting DB connection
+[2025-04-04 07:37:03] DB connected successfully
+[2025-04-04 07:37:03] Displaying registration form
+[2025-04-04 07:40:26] Attempting DB connection
+[2025-04-04 07:40:26] DB connected successfully
+[2025-04-04 07:40:26] Displaying registration form
+[2025-04-04 07:42:12] Attempting DB connection
+[2025-04-04 07:42:12] DB connected successfully
+[2025-04-04 07:42:12] Displaying registration form
+[2025-04-04 07:45:35] Attempting DB connection
+[2025-04-04 07:45:35] DB connected successfully
+[2025-04-04 07:45:35] Displaying registration form
+[2025-04-04 07:45:53] Attempting DB connection
+[2025-04-04 07:45:53] DB connected successfully
+[2025-04-04 07:45:53] Displaying registration form
+[2025-04-04 07:46:27] Attempting DB connection
+[2025-04-04 07:46:27] DB connected successfully
+[2025-04-04 07:46:27] Received POST data: Array
+(
+    [username] => Dimass
+    [password] => asdasd
+    [login] => 
+)
+
+[2025-04-04 07:46:27] Trying to register user: Dimass
+[2025-04-04 07:46:27] User registered successfully. ID: 2
+[2025-04-04 07:54:31] Attempting DB connection
+[2025-04-04 07:54:31] DB connected successfully
+[2025-04-04 07:54:31] Displaying registration form
+[2025-04-04 07:58:27] Attempting DB connection
+[2025-04-04 07:58:27] DB connected successfully
+[2025-04-04 07:58:27] Displaying registration form
+[2025-04-04 07:58:36] Attempting DB connection
+[2025-04-04 07:58:36] DB connected successfully
+[2025-04-04 07:58:36] Received POST data: Array
+(
+    [username] => Dimass
+    [password] => 1404
+    [register] => 
+)
+
+[2025-04-04 07:58:36] Validation error: Пароль должен быть не менее 6 символов
+[2025-04-04 07:58:36] Attempting DB connection
+[2025-04-04 07:58:36] DB connected successfully
+[2025-04-04 07:58:36] Displaying registration form
+[2025-04-04 07:58:45] Attempting DB connection
+[2025-04-04 07:58:45] DB connected successfully
+[2025-04-04 07:58:45] Received POST data: Array
+(
+    [username] => Dimass
+    [password] => 140444
+    [register] => 
+)
+
+[2025-04-04 07:58:45] Trying to register user: Dimass
+[2025-04-04 07:58:45] Registration failed: Ошибка регистрации: Duplicate entry 'Dimass' for key 'username'
+[2025-04-04 07:58:45] Attempting DB connection
+[2025-04-04 07:58:45] DB connected successfully
+[2025-04-04 07:58:45] Displaying registration form
+[2025-04-04 07:59:00] Attempting DB connection
+[2025-04-04 07:59:00] DB connected successfully
+[2025-04-04 07:59:00] Received POST data: Array
+(
+    [username] => Dimasss
+    [password] => Dimasss
+    [register] => 
+)
+
+[2025-04-04 07:59:00] Trying to register user: Dimasss
+[2025-04-04 07:59:00] User registered successfully. ID: 4
+[2025-04-04 07:59:24] Attempting DB connection
+[2025-04-04 07:59:24] DB connected successfully
+[2025-04-04 07:59:24] Received POST data: Array
+(
+    [username] => Dimasss
+    [password] => Dimasss
+    [register] => 
+)
+
+[2025-04-04 07:59:24] Trying to register user: Dimasss
+[2025-04-04 07:59:24] Registration failed: Ошибка регистрации: Duplicate entry 'Dimasss' for key 'username'
+[2025-04-04 07:59:24] Attempting DB connection
+[2025-04-04 07:59:24] DB connected successfully
+[2025-04-04 07:59:24] Displaying registration form
+[2025-04-04 07:59:31] Attempting DB connection
+[2025-04-04 07:59:31] DB connected successfully
+[2025-04-04 07:59:31] Received POST data: Array
+(
+    [username] => Dimasss
+    [password] => Dimasss
+    [register] => 
+)
+
+[2025-04-04 07:59:31] Trying to register user: Dimasss
+[2025-04-04 07:59:31] Registration failed: Ошибка регистрации: Duplicate entry 'Dimasss' for key 'username'
+[2025-04-04 07:59:31] Attempting DB connection
+[2025-04-04 07:59:31] DB connected successfully
+[2025-04-04 07:59:31] Displaying registration form
+[2025-04-04 07:59:42] Attempting DB connection
+[2025-04-04 07:59:42] DB connected successfully
+[2025-04-04 07:59:42] Received POST data: Array
+(
+    [username] => Dimasss
+    [password] => Dimasss
+    [register] => 
+)
+
+[2025-04-04 07:59:42] Trying to register user: Dimasss
+[2025-04-04 07:59:42] User registered successfully. ID: 7
+[2025-04-04 07:59:58] Attempting DB connection
+[2025-04-04 07:59:58] DB connected successfully
+[2025-04-04 07:59:58] Displaying registration form
+[2025-04-04 08:02:37] Attempting DB connection
+[2025-04-04 08:02:37] DB connected successfully
+[2025-04-04 08:23:02] Attempting DB connection
+[2025-04-04 08:23:02] DB connected successfully
+[2025-04-04 08:23:21] Attempting DB connection
+[2025-04-04 08:23:21] DB connected successfully
+[2025-04-04 08:23:21] Received POST data: Array
+(
+    [username] => Dimon4ik14
+    [password] => 1140444
+    [register] => 
+)
+
+[2025-04-04 08:23:21] Trying to register user: Dimon4ik14
+[2025-04-04 08:23:21] User registered successfully. ID: 8
+[2025-04-04 08:23:45] Attempting DB connection
+[2025-04-04 08:23:45] DB connected successfully
+[2025-04-04 08:23:45] Received POST data: Array
+(
+    [username] => Dimon4ik14
+    [password] => 1140444
+    [register] => 
+)
+
+[2025-04-04 08:23:46] Trying to register user: Dimon4ik14
+[2025-04-04 08:23:46] Registration failed: Ошибка регистрации: Duplicate entry 'Dimon4ik14' for key 'username'
+[2025-04-04 08:23:46] Attempting DB connection
+[2025-04-04 08:23:46] DB connected successfully
+[2025-04-04 08:24:25] Attempting DB connection
+[2025-04-04 08:24:25] DB connected successfully
+[2025-04-04 08:24:31] Attempting DB connection
+[2025-04-04 08:24:31] DB connected successfully
+[2025-04-04 08:24:31] Received POST data: Array
+(
+    [username] => Dimon4ik14
+    [password] => 140444
+    [register] => 
+)
+
+[2025-04-04 08:24:31] Trying to register user: Dimon4ik14
+[2025-04-04 08:24:31] Registration failed: Ошибка регистрации: Duplicate entry 'Dimon4ik14' for key 'username'
+[2025-04-04 08:24:31] Attempting DB connection
+[2025-04-04 08:24:31] DB connected successfully
+[2025-04-04 08:24:46] Attempting DB connection
+[2025-04-04 08:24:46] DB connected successfully
+[2025-04-04 08:24:46] Received POST data: Array
+(
+    [username] => Dimon4ik14
+    [password] => 140444
+    [register] => 
+)
+
+[2025-04-04 08:24:46] Trying to register user: Dimon4ik14
+[2025-04-04 08:24:46] User registered successfully. ID: 11
+[2025-04-04 08:30:42] Attempting DB connection
+[2025-04-04 08:30:42] DB connected successfully
+[2025-04-09 11:15:55] Attempting DB connection
+[2025-04-09 11:15:55] DB connected successfully
+[2025-04-09 11:15:59] Attempting DB connection
+[2025-04-09 11:15:59] DB connected successfully
+[2025-04-09 11:15:59] Received POST data: Array
+(
+    [username] => Dimasss
+    [password] => 1404
+    [register] => 
+)
+
+[2025-04-09 11:15:59] Validation error: Пароль должен быть не менее 6 символов
+[2025-04-09 11:15:59] Attempting DB connection
+[2025-04-09 11:15:59] DB connected successfully
+[2025-04-09 11:16:06] Attempting DB connection
+[2025-04-09 11:16:06] DB connected successfully
+[2025-04-09 11:16:06] Received POST data: Array
+(
+    [username] => Dimasss
+    [password] => 140444
+    [register] => 
+)
+
+[2025-04-09 11:16:06] Trying to register user: Dimasss
+[2025-04-09 11:16:06] Registration failed: Ошибка регистрации: Duplicate entry 'Dimasss' for key 'username'
+[2025-04-09 11:16:06] Attempting DB connection
+[2025-04-09 11:16:06] DB connected successfully
+[2025-04-09 11:16:17] Attempting DB connection
+[2025-04-09 11:16:17] DB connected successfully
