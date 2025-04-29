@@ -10,5 +10,5 @@ $GLOBALS['current_avatar'] = $avatar;
 
 
 
-include 'index.html';
+include 'views/index.html';
 ?>
