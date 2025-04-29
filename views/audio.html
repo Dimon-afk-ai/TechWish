@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Аудіотехніка | TechWish</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../static/audio.css">
+</head>
+<body>
+<?php include('header.html'); ?>
+    <div class="main-container">
+        <div class="filters-column">
+            <button class="filter-btn" id="filterToggle">
+                <i class="fas fa-filter"></i> Фільтри
+            </button>
+            
+            <form method="get" action="audio.php" class="filters-container" id="filtersForm">
+                <?php if (isset($categories) && is_array($categories)): ?>
+                <div class="filter-section">
+                    <h3><i class="fas fa-list"></i> Категорії</h3>
+                    <div class="filter-options">
+                        <?php foreach ($categories as $cat): ?>
+                            <label class="filter-checkbox">
+                                <input type="checkbox" name="category[]" value="<?php echo htmlspecialchars($cat); ?>" 
+                                    <?php echo (isset($selectedCategories) && in_array($cat, $selectedCategories)) ? 'checked' : ''; ?>>
+                                <?php echo htmlspecialchars($cat); ?>
+                            </label>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+                <?php endif; ?>
+                
+                <div class="filter-section">
+                    <h3><i class="fas fa-tag"></i> Ціна</h3>
+                    <div class="price-range">
+                        <input type="number" name="price_min" placeholder="Від" 
+                               value="<?php echo isset($price_min) && $price_min !== null ? htmlspecialchars($price_min) : ''; ?>">
+                        <input type="number" name="price_max" placeholder="До" 
+                               value="<?php echo isset($price_max) && $price_max !== null ? htmlspecialchars($price_max) : ''; ?>">
+                    </div>
+                </div>
+                
+                <?php if (isset($brands) && is_array($brands)): ?>
+                <div class="filter-section">
+                    <h3><i class="fas fa-industry"></i> Бренди</h3>
+                    <div class="filter-options">
+                        <?php foreach ($brands as $brand): ?>
+                            <label class="filter-checkbox">
+                                <input type="checkbox" name="brand[]" value="<?php echo htmlspecialchars($brand); ?>" 
+                                    <?php echo (isset($selectedBrands) && in_array($brand, $selectedBrands)) ? 'checked' : ''; ?>>
+                                <?php echo htmlspecialchars($brand); ?>
+                            </label>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+                <?php endif; ?>
+                
+                <?php if (isset($connections) && is_array($connections)): ?>
+                <div class="filter-section">
+                    <h3><i class="fas fa-wifi"></i> Тип підключення</h3>
+                    <div class="filter-options">
+                        <?php foreach ($connections as $connection): ?>
+                            <label class="filter-checkbox">
+                                <input type="checkbox" name="connection[]" value="<?php echo htmlspecialchars($connection); ?>" 
+                                    <?php echo (isset($selectedConnections) && in_array($connection, $selectedConnections)) ? 'checked' : ''; ?>>
+                                <?php echo htmlspecialchars($connection); ?>
+                            </label>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+                <?php endif; ?>
+                
+                <?php if (isset($types) && is_array($types)): ?>
+                <div class="filter-section">
+                    <h3><i class="fas fa-headphones"></i> Типи пристроїв</h3>
+                    <div class="filter-options">
+                        <?php foreach ($types as $type): ?>
+                            <label class="filter-checkbox">
+                                <input type="checkbox" name="type[]" value="<?php echo htmlspecialchars($type); ?>" 
+                                    <?php echo (isset($selectedTypes) && in_array($type, $selectedTypes)) ? 'checked' : ''; ?>>
+                                <?php echo htmlspecialchars($type); ?>
+                            </label>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+                <?php endif; ?>
+                
+                <div class="filter-section">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-filter"></i> Застосувати фільтри
+                    </button>
+                    <a href="audio.php" class="filter-reset">
+                        <i class="fas fa-times"></i> Скинути всі фільтри
+                    </a>
+                </div>
+            </form>
+        </div>
+        
+        <div class="products-column">
+            <h1 class="page-title">
+                <i class="fas fa-headphones"></i>
+                <span>Аудіотехніка</span>
+            </h1>
+            
+            <div class="sorting">
+                <div class="results-count">
+                    Знайдено товарів: <?php echo isset($total_products) ? htmlspecialchars($total_products) : '0'; ?>
+                </div>
+                <select name="sort" class="sort-select" onchange="window.location.href=this.value">
+                    <option value="audio.php?<?php echo isset($_GET) ? http_build_query(array_merge($_GET, ['sort' => 'newest'])) : 'sort=newest'; ?>" 
+                        <?php echo (isset($sort) && $sort === 'newest') ? 'selected' : ''; ?>>Новітні</option>
+                    <option value="audio.php?<?php echo isset($_GET) ? http_build_query(array_merge($_GET, ['sort' => 'price_asc'])) : 'sort=price_asc'; ?>" 
+                        <?php echo (isset($sort) && $sort === 'price_asc') ? 'selected' : ''; ?>>Від дешевих</option>
+                    <option value="audio.php?<?php echo isset($_GET) ? http_build_query(array_merge($_GET, ['sort' => 'price_desc'])) : 'sort=price_desc'; ?>" 
+                        <?php echo (isset($sort) && $sort === 'price_desc') ? 'selected' : ''; ?>>Від дорогих</option>
+                    <option value="audio.php?<?php echo isset($_GET) ? http_build_query(array_merge($_GET, ['sort' => 'popular'])) : 'sort=popular'; ?>" 
+                        <?php echo (isset($sort) && $sort === 'popular') ? 'selected' : ''; ?>>Популярні</option>
+                </select>
+            </div>
+            
+            <div class="products-grid">
+                <?php if (empty($products) || !is_array($products)): ?>
+                    <div class="no-results">
+                        <i class="fas fa-search"></i>
+                        <h3>Нічого не знайдено</h3>
+                        <p>Спробуйте змінити параметри фільтрації</p>
+                        <a href="audio.php" class="btn btn-primary" style="margin-top: 20px;">
+                            Показати всі товари
+                        </a>
+                    </div>
+                <?php else: ?>
+                    <?php foreach ($products as $product): ?>
+                        <div class="product-card">
+                            <div class="product-image-container">
+                                <img src="<?php echo isset($product['image_url']) ? htmlspecialchars($product['image_url']) : ''; ?>" 
+                                     alt="<?php echo isset($product['name']) ? htmlspecialchars($product['name']) : ''; ?>" 
+                                     class="product-image">
+                            </div>
+                            <div class="product-info">
+                                <div class="product-brand"><?php echo isset($product['brand']) ? htmlspecialchars($product['brand']) : ''; ?></div>
+                                <h3 class="product-name"><?php echo isset($product['name']) ? htmlspecialchars($product['name']) : ''; ?></h3>
+                                
+                                <div class="product-specs">
+                                    <?php if (isset($product['category'])): ?>
+                                    <span class="product-spec">
+                                        <i class="fas fa-headphones"></i> <?php echo htmlspecialchars($product['category']); ?>
+                                    </span>
+                                    <?php endif; ?>
+                                    
+                                    <?php if (isset($product['type'])): ?>
+                                    <span class="product-spec">
+                                        <i class="fas fa-plug"></i> <?php echo htmlspecialchars($product['type']); ?>
+                                    </span>
+                                    <?php endif; ?>
+                                    
+                                    <?php if (isset($product['connection'])): ?>
+                                    <span class="product-spec">
+                                        <i class="fas fa-wifi"></i> <?php echo htmlspecialchars($product['connection']); ?>
+                                    </span>
+                                    <?php endif; ?>
+                                    
+                                    <?php if (isset($product['frequency_response'])): ?>
+                                    <span class="product-spec">
+                                        <i class="fas fa-wave-square"></i> <?php echo htmlspecialchars($product['frequency_response']); ?>
+                                    </span>
+                                    <?php endif; ?>
+                                </div>
+                                
+                                <div class="product-price"><?php echo isset($product['price']) ? number_format($product['price'], 0, '', ' ') : '0'; ?> ₴</div>
+                                <div class="product-actions">
+                                    <a href="wishlist.php?action=add&id=<?php echo isset($product['id']) ? htmlspecialchars($product['id']) : ''; ?>" class="btn btn-outline">
+                                        <i class="far fa-heart"></i>
+                                    </a>
+                                    <a href="cart.php?action=add&id=<?php echo isset($product['id']) ? htmlspecialchars($product['id']) : ''; ?>" class="btn btn-primary">
+                                        <i class="fas fa-cart-plus"></i> Купити
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </div>
+            
+            <?php if (isset($total_products) && isset($per_page) && $total_products > $per_page): ?>
+            <div class="pagination">
+                <?php if (isset($page) && $page > 1): ?>
+                    <a href="<?php echo 'audio.php?' . (isset($_GET) ? http_build_query(array_merge($_GET, ['page' => 1])) : 'page=1'); ?>">
+                        &laquo;&laquo;
+                    </a>
+                    <a href="<?php echo 'audio.php?' . (isset($_GET) ? http_build_query(array_merge($_GET, ['page' => $page - 1])) : 'page=1'); ?>">
+                        &laquo;
+                    </a>
+                <?php endif; ?>
+                
+                <?php 
+                $start = isset($page) ? max(1, $page - 2) : 1;
+                $end = isset($total_products) && isset($per_page) ? min($start + 4, ceil($total_products / $per_page)) : 1;
+                
+                for ($i = $start; $i <= $end; $i++): ?>
+                    <a href="<?php echo 'audio.php?' . (isset($_GET) ? http_build_query(array_merge($_GET, ['page' => $i])) : 'page='.$i); ?>" 
+                       <?php echo (isset($page) && $i == $page) ? 'class="active"' : ''; ?>>
+                        <?php echo $i; ?>
+                    </a>
+                <?php endfor; ?>
+                
+                <?php if (isset($page) && isset($total_products) && isset($per_page) && $page < ceil($total_products / $per_page)): ?>
+                    <a href="<?php echo 'audio.php?' . (isset($_GET) ? http_build_query(array_merge($_GET, ['page' => $page + 1])) : 'page=2'); ?>">
+                        &raquo;
+                    </a>
+                    <a href="<?php echo 'audio.php?' . (isset($_GET) ? http_build_query(array_merge($_GET, ['page' => ceil($total_products / $per_page)])) : 'page=1'); ?>">
+                        &raquo;&raquo;
+                    </a>
+                <?php endif; ?>
+            </div>
+            <?php endif; ?>
+        </div>
+    </div>
+
+    <?php include('footer.html'); ?>
+
+    <script>
+        // Toggle filters on mobile
+        document.getElementById('filterToggle')?.addEventListener('click', function() {
+            const filtersForm = document.getElementById('filtersForm');
+            if (filtersForm) {
+                filtersForm.classList.toggle('visible');
+            }
+        });
+        
+        // Validate price range
+        document.querySelector('form')?.addEventListener('submit', function(e) {
+            const priceMin = document.querySelector('input[name="price_min"]');
+            const priceMax = document.querySelector('input[name="price_max"]');
+            
+            if (priceMin?.value && priceMax?.value && parseFloat(priceMin.value) > parseFloat(priceMax.value)) {
+                alert('Максимальна ціна повинна бути більше мінімальної');
+                e.preventDefault();
+            }
+        });
+        
+        // Preserve filters when sorting
+        document.querySelector('.sort-select')?.addEventListener('change', function() {
+            const url = new URL(this.value);
+            const params = new URLSearchParams(window.location.search);
+            
+            // Preserve all current filters
+            params.forEach((value, key) => {
+                if (key !== 'sort' && key !== 'page') {
+                    if (Array.isArray(value)) {
+                        value.forEach(v => url.searchParams.append(key, v));
+                    } else {
+                        url.searchParams.append(key, value);
+                    }
+                }
+            });
+            
+            window.location.href = url.toString();
+        });
+
+        // AJAX загрузка товаров при изменении фильтров
+        const filterInputs = document.querySelectorAll('#filtersForm input[type="checkbox"], #filtersForm input[type="number"]');
+        if (filterInputs) {
+            filterInputs.forEach(input => {
+                input.addEventListener('change', function() {
+                    const formData = new FormData(document.getElementById('filtersForm'));
+                    const params = new URLSearchParams(formData);
+                    
+                    fetch('audio.php?' + params.toString(), {
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.products_html) {
+                            const productsGrid = document.querySelector('.products-grid');
+                            if (productsGrid) productsGrid.innerHTML = data.products_html;
+                        }
+                        if (data.pagination_html) {
+                            const pagination = document.querySelector('.pagination');
+                            if (pagination) pagination.innerHTML = data.pagination_html;
+                        }
+                        if (data.total_products) {
+                            const resultsCount = document.querySelector('.results-count');
+                            if (resultsCount) resultsCount.textContent = `Знайдено товарів: ${data.total_products}`;
+                        }
+                        
+                        // Обновляем URL без перезагрузки страницы
+                        window.history.pushState({}, '', 'audio.php?' + params.toString());
+                    })
+                    .catch(error => console.error('Error:', error));
+                });
+            });
+        }
+    </script>
+</body>
+</html>
