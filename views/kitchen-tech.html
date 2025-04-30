@@ -15,7 +15,7 @@
                 <i class="fas fa-filter"></i> Фільтри
             </button>
             
-            <form method="get" action="kitchen.php" class="filters-container" id="filtersForm">
+            <form method="get" action="kitchen-tech.php" class="filters-container" id="filtersForm">
                 <div class="filter-section">
                     <h3><i class="fas fa-list"></i> Категорії</h3>
                     <div class="filter-options">
@@ -69,7 +69,7 @@
                     <button type="submit" class="btn btn-primary">
                         <i class="fas fa-filter"></i> Застосувати фільтри
                     </button>
-                    <a href="kitchen.php" class="filter-reset">
+                    <a href="kitchen-tech.php" class="filter-reset">
                         <i class="fas fa-times"></i> Скинути всі фільтри
                     </a>
                 </div>
@@ -87,13 +87,13 @@
                     Знайдено товарів: <?php echo $total_products; ?>
                 </div>
                 <select name="sort" class="sort-select" onchange="window.location.href=this.value">
-                    <option value="kitchen.php?<?php echo http_build_query(array_merge($_GET, ['sort' => 'newest'])); ?>" 
+                    <option value="kitchen-tech.php?<?php echo http_build_query(array_merge($_GET, ['sort' => 'newest'])); ?>" 
                         <?php echo $sort === 'newest' ? 'selected' : ''; ?>>Новітні</option>
-                    <option value="kitchen.php?<?php echo http_build_query(array_merge($_GET, ['sort' => 'price_asc'])); ?>" 
+                    <option value="kitchen-tech.php?<?php echo http_build_query(array_merge($_GET, ['sort' => 'price_asc'])); ?>" 
                         <?php echo $sort === 'price_asc' ? 'selected' : ''; ?>>Від дешевих</option>
-                    <option value="kitchen.php?<?php echo http_build_query(array_merge($_GET, ['sort' => 'price_desc'])); ?>" 
+                    <option value="kitchen-tech.php?<?php echo http_build_query(array_merge($_GET, ['sort' => 'price_desc'])); ?>" 
                         <?php echo $sort === 'price_desc' ? 'selected' : ''; ?>>Від дорогих</option>
-                    <option value="kitchen.php?<?php echo http_build_query(array_merge($_GET, ['sort' => 'popular'])); ?>" 
+                    <option value="kitchen-tech.php?<?php echo http_build_query(array_merge($_GET, ['sort' => 'popular'])); ?>" 
                         <?php echo $sort === 'popular' ? 'selected' : ''; ?>>Популярні</option>
                 </select>
             </div>
@@ -104,7 +104,7 @@
                         <i class="fas fa-search"></i>
                         <h3>Нічого не знайдено</h3>
                         <p>Спробуйте змінити параметри фільтрації</p>
-                        <a href="kitchen.php" class="btn btn-primary" style="margin-top: 20px;">
+                        <a href="kitchen-tech.php" class="btn btn-primary" style="margin-top: 20px;">
                             Показати всі товари
                         </a>
                     </div>
@@ -155,41 +155,49 @@
             
             <?php if ($total_products > $per_page): ?>
             <div class="pagination">
+                <?php
+                $total_pages = ceil($total_products / $per_page);
+                $baseParams = $_GET;
+                unset($baseParams['page']); // удаляем текущую страницу, чтобы не дублировать
+        
+                // определяем диапазон страниц для отображения
+                $start = max(1, $page - 2);
+                $end = min($total_pages, $start + 4);
+                if ($end - $start < 4) {
+                    $start = max(1, $end - 4);
+                }
+                ?>
+        
+                <!-- Первая и предыдущая страницы -->
                 <?php if ($page > 1): ?>
-                    <a href="<?php echo 'kitchen.php?' . http_build_query(array_merge($_GET, ['page' => 1])); ?>">
+                    <a href="kitchen-tech.php?<?php echo http_build_query(array_merge($baseParams, ['page' => 1]), '', '&', PHP_QUERY_RFC3986); ?>">
                         &laquo;&laquo;
                     </a>
-                    <a href="<?php echo 'kitchen.php?' . http_build_query(array_merge($_GET, ['page' => $page - 1])); ?>">
+                    <a href="kitchen-tech.php?<?php echo http_build_query(array_merge($baseParams, ['page' => $page - 1]), '', '&', PHP_QUERY_RFC3986); ?>">
                         &laquo;
                     </a>
                 <?php endif; ?>
-                
-                <?php 
-                $start = max(1, $page - 2);
-                $end = min($start + 4, ceil($total_products / $per_page));
-                
-                for ($i = $start; $i <= $end; $i++): ?>
-                    <a href="<?php echo 'kitchen.php?' . http_build_query(array_merge($_GET, ['page' => $i])); ?>" 
+        
+                <!-- Номера страниц -->
+                <?php for ($i = $start; $i <= $end; $i++): ?>
+                    <a href="kitchen-tech.php?<?php echo http_build_query(array_merge($baseParams, ['page' => $i]), '', '&', PHP_QUERY_RFC3986); ?>"
                        <?php echo $i == $page ? 'class="active"' : ''; ?>>
                         <?php echo $i; ?>
                     </a>
                 <?php endfor; ?>
-                
-                <?php if ($page < ceil($total_products / $per_page)): ?>
-                    <a href="<?php echo 'kitchen.php?' . http_build_query(array_merge($_GET, ['page' => $page + 1])); ?>">
+        
+                <!-- Следующая и последняя страницы -->
+                <?php if ($page < $total_pages): ?>
+                    <a href="kitchen-tech.php?<?php echo http_build_query(array_merge($baseParams, ['page' => $page + 1]), '', '&', PHP_QUERY_RFC3986); ?>">
                         &raquo;
                     </a>
-                    <a href="<?php echo 'kitchen.php?' . http_build_query(array_merge($_GET, ['page' => ceil($total_products / $per_page)])); ?>">
+                    <a href="kitchen-tech.php?<?php echo http_build_query(array_merge($baseParams, ['page' => $total_pages]), '', '&', PHP_QUERY_RFC3986); ?>">
                         &raquo;&raquo;
                     </a>
                 <?php endif; ?>
             </div>
-            <?php endif; ?>
-        </div>
+        <?php endif; ?>
     </div>
-
-    <?php include('footer.html'); ?>
-
     <script>
         // Toggle filters on mobile
         document.getElementById('filterToggle').addEventListener('click', function() {

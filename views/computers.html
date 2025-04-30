@@ -5,10 +5,51 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ноутбуки, Планшети, БФП | TechWish</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="../static/notebook_tablet.css">
+    <link rel="stylesheet" href="../static/computers.css">
+      
 </head>
 <body>
-    <?php include('header.html'); ?>
+    <header>
+        <nav>
+            <a href="/" class="logo">
+                <i class="fas fa-heart logo-icon"></i>
+                <span>TechWish</span>
+            </a>
+            <div class="auth-buttons">
+                <?php if(isset($_SESSION['user_id'])): ?>
+                    <div class="menu">
+                        <div class="user-profile">
+                        <img src="/<?php echo $avatar; ?>" alt="Аватар" class="user-avatar">                             
+                        <span><?php echo htmlspecialchars($_SESSION['username']); ?></span>
+                    </div>
+                        <div class="dropdown profile-dropdown">
+                            <a href="/profile.php">
+                                <i class="fas fa-user-circle"></i>
+                                <span>Профіль</span>
+                            </a>
+                            <a href="/wishlist.php">
+                                <i class="fas fa-heart"></i>
+                                <span>Вишлист</span>
+                            </a>
+                            <a href="/logout.php">
+                                <i class="fas fa-sign-out-alt"></i>
+                                <span>Вийти</span>
+                            </a>
+                        </div>
+                    </div>
+                <?php else: ?>
+                    <a href="/login.php" class="auth-btn">
+                        <i class="fas fa-sign-in-alt"></i>
+                        <span>Увійти</span>
+                    </a>
+                    <a href="/register.php" class="auth-btn">
+                        <i class="fas fa-user-plus"></i>
+                        <span>Реєстрація</span>
+                    </a>
+                <?php endif; ?>
+            </div>
+        </nav>
+    </header>
 
     <div class="main-container">
         <div class="filters-column">
@@ -202,7 +243,41 @@
         </div>
     </div>
 
-    <?php include('footer.html'); ?>
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>Каталог</h3>
+                <a href="smartphones.php">Смартфони</a>
+                <a href="notebooks-tablets.php">Ноутбуки</a>
+                <a href="notebooks-tablets.php">Планшети</a>
+                <a href="notebooks-tablets.php">БФП</a>
+                <a href="#">Навушники</a>
+            </div>
+            
+            <div class="footer-section">
+                <h3>Клієнтам</h3>
+                <a href="#">Доставка і оплата</a>
+                <a href="#">Гарантія</a>
+                <a href="#">Повернення</a>
+                <a href="#">Кредит</a>
+            </div>
+            
+            <div class="footer-section">
+                <h3>Про нас</h3>
+                <a href="#">Про компанію</a>
+                <a href="#">Контакти</a>
+                <a href="#">Вакансії</a>
+                <a href="#">Блог</a>
+            </div>
+            
+            <div class="footer-section">
+                <h3>Контакти</h3>
+                <a href="#"><i class="fas fa-phone"></i> 0 800 123 456</a>
+                <a href="#"><i class="fas fa-envelope"></i> info@techwish.ua</a>
+                <a href="#"><i class="fas fa-map-marker-alt"></i> Київ, вул. Технічна 15</a>
+            </div>
+        </div>
+    </footer>
 
     <script>
         // Toggle filters on mobile

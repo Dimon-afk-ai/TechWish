@@ -10,7 +10,7 @@ class AudioModel
 		
 		extract($parameters);
 		// Строим SQL запрос для товаров
-		$sql = "SELECT * FROM audio_products WHERE 1=1";
+		$sql = "SELECT * FROM audio_appliances WHERE 1=1";
 
 		$params = [];
 
@@ -63,7 +63,7 @@ class AudioModel
 			$products = $stmt->fetchAll(PDO::FETCH_ASSOC);
 			
 			// Получаем общее количество товаров (для пагинации)
-			$count_sql = "SELECT COUNT(*) FROM audio_products WHERE 1=1";
+			$count_sql = "SELECT COUNT(*) FROM audio_appliances WHERE 1=1";
 			$count_params = [];
 
 			// Те же условия фильтрации, что и для основного запроса
