@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Кухонна техніка | TechWish</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../static/kitchen-tech.css">
+</head>
+<body>
+<?php include('header.html'); ?>
+    <div class="main-container">
+        <div class="filters-column">
+            <button class="filter-btn" id="filterToggle">
+                <i class="fas fa-filter"></i> Фільтри
+            </button>
+            
+            <form method="get" action="kitchen.php" class="filters-container" id="filtersForm">
+                <div class="filter-section">
+                    <h3><i class="fas fa-list"></i> Категорії</h3>
+                    <div class="filter-options">
+                        <?php foreach ($categories as $cat): ?>
+                            <label class="filter-checkbox">
+                                <input type="checkbox" name="category[]" value="<?php echo $cat; ?>" 
+                                    <?php echo in_array($cat, $selectedCategories) ? 'checked' : ''; ?>>
+                                <?php echo $cat; ?>
+                            </label>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+                
+                <div class="filter-section">
+                    <h3><i class="fas fa-tag"></i> Ціна</h3>
+                    <div class="price-range">
+                        <input type="number" name="price_min" placeholder="Від" 
+                               value="<?php echo $price_min !== null ? $price_min : ''; ?>">
+                        <input type="number" name="price_max" placeholder="До" 
+                               value="<?php echo $price_max !== null ? $price_max : ''; ?>">
+                    </div>
+                </div>
+                
+                <div class="filter-section">
+                    <h3><i class="fas fa-industry"></i> Бренди</h3>
+                    <div class="filter-options">
+                        <?php foreach ($brands as $brand): ?>
+                            <label class="filter-checkbox">
+                                <input type="checkbox" name="brand[]" value="<?php echo $brand; ?>" 
+                                    <?php echo in_array($brand, $selectedBrands) ? 'checked' : ''; ?>>
+                                <?php echo $brand; ?>
+                            </label>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+                
+                <div class="filter-section">
+                    <h3><i class="fas fa-cube"></i> Тип</h3>
+                    <div class="filter-options">
+                        <?php foreach ($types as $type): ?>
+                            <label class="filter-checkbox">
+                                <input type="checkbox" name="type[]" value="<?php echo $type; ?>" 
+                                    <?php echo in_array($type, $selectedTypes) ? 'checked' : ''; ?>>
+                                <?php echo $type; ?>
+                            </label>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+                
+                <div class="filter-section">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-filter"></i> Застосувати фільтри
+                    </button>
+                    <a href="kitchen.php" class="filter-reset">
+                        <i class="fas fa-times"></i> Скинути всі фільтри
+                    </a>
+                </div>
+            </form>
+        </div>
+        
+        <div class="products-column">
+            <h1 class="page-title">
+                <i class="fas fa-blender"></i>
+                <span>Кухонна техніка</span>
+            </h1>
+            
+            <div class="sorting">
+                <div class="results-count">
+                    Знайдено товарів: <?php echo $total_products; ?>
+                </div>
+                <select name="sort" class="sort-select" onchange="window.location.href=this.value">
+                    <option value="kitchen.php?<?php echo http_build_query(array_merge($_GET, ['sort' => 'newest'])); ?>" 
+                        <?php echo $sort === 'newest' ? 'selected' : ''; ?>>Новітні</option>
+                    <option value="kitchen.php?<?php echo http_build_query(array_merge($_GET, ['sort' => 'price_asc'])); ?>" 
+                        <?php echo $sort === 'price_asc' ? 'selected' : ''; ?>>Від дешевих</option>
+                    <option value="kitchen.php?<?php echo http_build_query(array_merge($_GET, ['sort' => 'price_desc'])); ?>" 
+                        <?php echo $sort === 'price_desc' ? 'selected' : ''; ?>>Від дорогих</option>
+                    <option value="kitchen.php?<?php echo http_build_query(array_merge($_GET, ['sort' => 'popular'])); ?>" 
+                        <?php echo $sort === 'popular' ? 'selected' : ''; ?>>Популярні</option>
+                </select>
+            </div>
+            
+            <div class="products-grid">
+                <?php if (empty($products)): ?>
+                    <div class="no-results">
+                        <i class="fas fa-search"></i>
+                        <h3>Нічого не знайдено</h3>
+                        <p>Спробуйте змінити параметри фільтрації</p>
+                        <a href="kitchen.php" class="btn btn-primary" style="margin-top: 20px;">
+                            Показати всі товари
+                        </a>
+                    </div>
+                <?php else: ?>
+                    <?php foreach ($products as $product): ?>
+                        <div class="product-card">
+                            <div class="product-image-container">
+                                <img src="<?php echo htmlspecialchars($product['image_url']); ?>" 
+                                     alt="<?php echo htmlspecialchars($product['name']); ?>" 
+                                     class="product-image">
+                            </div>
+                            <div class="product-info">
+                                <div class="product-brand"><?php echo htmlspecialchars($product['brand']); ?></div>
+                                <h3 class="product-name"><?php echo htmlspecialchars($product['name']); ?></h3>
+                                
+                                <div class="product-specs">
+                                    <span class="product-spec">
+                                        <i class="fas fa-box"></i> <?php echo htmlspecialchars($product['category']); ?>
+                                    </span>
+                                    
+                                    <?php if (!empty($product['type'])): ?>
+                                    <span class="product-spec">
+                                        <i class="fas fa-cube"></i> <?php echo htmlspecialchars($product['type']); ?>
+                                    </span>
+                                    <?php endif; ?>
+                                    
+                                    <?php if (!empty($product['features'])): ?>
+                                    <span class="product-spec">
+                                        <i class="fas fa-star"></i> <?php echo htmlspecialchars($product['features']); ?>
+                                    </span>
+                                    <?php endif; ?>
+                                </div>
+                                
+                                <div class="product-price"><?php echo number_format($product['price'], 0, '', ' '); ?> ₴</div>
+                                <div class="product-actions">
+                                    <a href="wishlist.php?action=add&id=<?php echo $product['id']; ?>" class="btn btn-outline">
+                                        <i class="far fa-heart"></i>
+                                    </a>
+                                    <a href="cart.php?action=add&id=<?php echo $product['id']; ?>" class="btn btn-primary">
+                                        <i class="fas fa-cart-plus"></i> Купити
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </div>
+            
+            <?php if ($total_products > $per_page): ?>
+            <div class="pagination">
+                <?php if ($page > 1): ?>
+                    <a href="<?php echo 'kitchen.php?' . http_build_query(array_merge($_GET, ['page' => 1])); ?>">
+                        &laquo;&laquo;
+                    </a>
+                    <a href="<?php echo 'kitchen.php?' . http_build_query(array_merge($_GET, ['page' => $page - 1])); ?>">
+                        &laquo;
+                    </a>
+                <?php endif; ?>
+                
+                <?php 
+                $start = max(1, $page - 2);
+                $end = min($start + 4, ceil($total_products / $per_page));
+                
+                for ($i = $start; $i <= $end; $i++): ?>
+                    <a href="<?php echo 'kitchen.php?' . http_build_query(array_merge($_GET, ['page' => $i])); ?>" 
+                       <?php echo $i == $page ? 'class="active"' : ''; ?>>
+                        <?php echo $i; ?>
+                    </a>
+                <?php endfor; ?>
+                
+                <?php if ($page < ceil($total_products / $per_page)): ?>
+                    <a href="<?php echo 'kitchen.php?' . http_build_query(array_merge($_GET, ['page' => $page + 1])); ?>">
+                        &raquo;
+                    </a>
+                    <a href="<?php echo 'kitchen.php?' . http_build_query(array_merge($_GET, ['page' => ceil($total_products / $per_page)])); ?>">
+                        &raquo;&raquo;
+                    </a>
+                <?php endif; ?>
+            </div>
+            <?php endif; ?>
+        </div>
+    </div>
+
+    <?php include('footer.html'); ?>
+
+    <script>
+        // Toggle filters on mobile
+        document.getElementById('filterToggle').addEventListener('click', function() {
+            document.getElementById('filtersForm').classList.toggle('visible');
+        });
+        
+        // Validate price range
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const priceMin = document.querySelector('input[name="price_min"]');
+            const priceMax = document.querySelector('input[name="price_max"]');
+            
+            if (priceMin.value && priceMax.value && parseFloat(priceMin.value) > parseFloat(priceMax.value)) {
+                alert('Максимальна ціна повинна бути більше мінімальної');
+                e.preventDefault();
+            }
+        });
+        
+        // Preserve filters when sorting
+        document.querySelector('.sort-select').addEventListener('change', function() {
+            const url = new URL(this.value);
+            const params = new URLSearchParams(window.location.search);
+            
+            // Preserve all current filters
+            params.forEach((value, key) => {
+                if (key !== 'sort' && key !== 'page') {
+                    if (Array.isArray(value)) {
+                        value.forEach(v => url.searchParams.append(key, v));
+                    } else {
+                        url.searchParams.append(key, value);
+                    }
+                }
+            });
+            
+            window.location.href = url.toString();
+        });
+    </script>
+</body>
+</html>
