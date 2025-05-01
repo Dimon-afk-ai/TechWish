@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Смарт-годинники та трекери | TechWish</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../static/smart_watches.css">
+</head>
+<body>
+<?php include('header.html'); ?>
+    <div class="main-container">
+        <div class="filters-column">
+            <button class="filter-btn" id="filterToggle">
+                <i class="fas fa-filter"></i> Фільтри
+            </button>
+            
+            <form method="get" action="smart_watches.php" class="filters-container" id="filtersForm">
+                <!-- Категорії з підкатегоріями -->
+                <div class="filter-section">
+                    <h3><i class="fas fa-clock"></i> Категорії</h3>
+                    <div class="filter-options">
+                        <?php foreach ($categories as $mainCat => $subCats): ?>
+                            <div class="category-group">
+                                <label class="main-category">
+                                    <input type="checkbox" 
+                                           onchange="toggleSubcategories(this)" 
+                                           data-category="<?= htmlspecialchars($mainCat) ?>">
+                                    <?= htmlspecialchars($mainCat) ?>
+                                </label>
+                                <div class="subcategories" id="sub-<?= preg_replace('/\s+/', '-', $mainCat) ?>">
+                                    <?php foreach ($subCats as $subCat): ?>
+                                        <label class="filter-checkbox subcategory">
+                                            <input type="checkbox" name="subcategory[]" 
+                                                   value="<?= htmlspecialchars($subCat) ?>"
+                                                   <?= in_array($subCat, $selectedSubcategories) ? 'checked' : '' ?>>
+                                            <?= htmlspecialchars($subCat) ?>
+                                        </label>
+                                    <?php endforeach; ?>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+                
+                <!-- Бренди -->
+                <div class="filter-section">
+                    <h3><i class="fas fa-copyright"></i> Бренди</h3>
+                    <div class="filter-options">
+                        <?php foreach ($brands as $brand): ?>
+                            <label class="filter-checkbox">
+                                <input type="checkbox" name="brand[]" value="<?= $brand ?>"
+                                    <?= in_array($brand, $selectedBrands) ? 'checked' : '' ?>>
+                                <?= $brand ?>
+                            </label>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+                
+                <!-- Функції -->
+                <div class="filter-section">
+                    <h3><i class="fas fa-microchip"></i> Функції</h3>
+                    <div class="filter-options">
+                        <?php foreach ($features as $feature): ?>
+                            <label class="filter-checkbox">
+                                <input type="checkbox" name="feature[]" value="<?= $feature ?>"
+                                    <?= in_array($feature, $selectedFeatures) ? 'checked' : '' ?>>
+                                <?= $feature ?>
+                            </label>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+                
+                <!-- Ціна -->
+                <div class="filter-section">
+                    <h3><i class="fas fa-tag"></i> Ціна</h3>
+                    <div class="price-range">
+                        <input type="number" name="price_min" placeholder="Від" value="<?= $price_min ?>">
+                        <input type="number" name="price_max" placeholder="До" value="<?= $price_max ?>">
+                    </div>
+                </div>
+                
+                <!-- Кнопки -->
+                <div class="filter-section actions">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-check"></i> Застосувати
+                    </button>
+                    <a href="smart_watches.php" class="btn btn-outline">
+                        <i class="fas fa-undo"></i> Скинути
+                    </a>
+                </div>
+            </form>
+        </div>
+        
+        <div class="products-column">
+            <h1 class="page-title">
+                <i class="fas fa-clock"></i>
+                <span>Смарт-годинники та трекери</span>
+            </h1>
+            
+            <!-- Блок новинок Apple Watch -->
+            <div class="new-products-section">
+                <h2 class="section-title">
+                    <i class="fas fa-star"></i> Новинки Apple Watch
+                </h2>
+                <div class="products-grid featured">
+                    <?php 
+                    $appleProducts = array_filter($products, function($p) { 
+                        return $p['brand'] === 'Apple'; 
+                    });
+                    foreach (array_slice($appleProducts, 0, 4) as $product): ?>
+                        <div class="product-card">
+                            <div class="product-badge">Новинка</div>
+                            <div class="product-image-container">
+                                <img src="<?= htmlspecialchars($product['image_url']) ?>" 
+                                     alt="<?= htmlspecialchars($product['name']) ?>">
+                            </div>
+                            <div class="product-info">
+                                <div class="product-brand"><?= htmlspecialchars($product['brand']) ?></div>
+                                <h3 class="product-name"><?= htmlspecialchars($product['name']) ?></h3>
+                                <div class="product-price"><?= number_format($product['price'], 0, '', ' ') ?> ₴</div>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+            
+            <!-- Основні товари -->
+            <div class="sorting">
+                <div class="results-count">
+                    Знайдено: <?= $total_products ?> товарів
+                </div>
+                <select name="sort" class="sort-select" onchange="updateSort(this.value)">
+                    <option value="smart_watches.php?<?= http_build_query(array_merge($_GET, ['sort' => 'newest'])) ?>"
+                        <?= $sort === 'newest' ? 'selected' : '' ?>>Новітні</option>
+                    <option value="smart_watches.php?<?= http_build_query(array_merge($_GET, ['sort' => 'price_asc'])) ?>"
+                        <?= $sort === 'price_asc' ? 'selected' : '' ?>>Від дешевих</option>
+                    <option value="smart_watches.php?<?= http_build_query(array_merge($_GET, ['sort' => 'price_desc'])) ?>"
+                        <?= $sort === 'price_desc' ? 'selected' : '' ?>>Від дорогих</option>
+                </select>
+            </div>
+            
+            <div class="products-grid main">
+                <?php if (empty($products)): ?>
+                    <div class="no-results">
+                        <i class="fas fa-search"></i>
+                        <h3>Нічого не знайдено</h3>
+                        <p>Спробуйте змінити параметри фільтрації</p>
+                        <a href="smart_watches.php" class="btn btn-primary">
+                            Показати всі товари
+                        </a>
+                    </div>
+                <?php else: ?>
+                    <?php foreach ($products as $product): ?>
+                        <div class="product-card">
+                            <?php if ($product['is_new']): ?>
+                                <div class="product-badge">Новинка</div>
+                            <?php endif; ?>
+                            <div class="product-image-container">
+                                <img src="<?= htmlspecialchars($product['image_url']) ?>" 
+                                     alt="<?= htmlspecialchars($product['name']) ?>">
+                            </div>
+                            <div class="product-info">
+                                <div class="product-brand"><?= htmlspecialchars($product['brand']) ?></div>
+                                <h3 class="product-name"><?= htmlspecialchars($product['name']) ?></h3>
+                                <div class="product-specs">
+                                    <span><i class="fas fa-tag"></i> <?= htmlspecialchars($product['category']) ?></span>
+                                    <?php if (!empty($product['subcategory'])): ?>
+                                        <span><i class="fas fa-tags"></i> <?= htmlspecialchars($product['subcategory']) ?></span>
+                                    <?php endif; ?>
+                                    <?php if (!empty($product['features'])): ?>
+                                        <span><i class="fas fa-microchip"></i> <?= htmlspecialchars($product['features']) ?></span>
+                                    <?php endif; ?>
+                                </div>
+                                <div class="product-price"><?= number_format($product['price'], 0, '', ' ') ?> ₴</div>
+                                <div class="product-actions">
+                                    <button class="btn btn-outline wishlist-btn">
+                                        <i class="far fa-heart"></i>
+                                    </button>
+                                    <button class="btn btn-primary cart-btn">
+                                        <i class="fas fa-shopping-cart"></i> Купити
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </div>
+            
+            <?php if ($total_products > $per_page): ?>
+            <div class="pagination">
+                <?php
+                $total_pages = ceil($total_products / $per_page);
+                $baseParams = $_GET;
+                unset($baseParams['page']);
+                
+                $start = max(1, $page - 2);
+                $end = min($total_pages, $start + 4);
+                if ($end - $start < 4) $start = max(1, $end - 4);
+                ?>
+                
+                <?php if ($page > 1): ?>
+                    <a href="smart_watches.php?<?= http_build_query(array_merge($baseParams, ['page' => 1])) ?>">
+                        <i class="fas fa-angle-double-left"></i>
+                    </a>
+                    <a href="smart_watches.php?<?= http_build_query(array_merge($baseParams, ['page' => $page-1])) ?>">
+                        <i class="fas fa-angle-left"></i>
+                    </a>
+                <?php endif; ?>
+                
+                <?php for ($i = $start; $i <= $end; $i++): ?>
+                    <a href="smart_watches.php?<?= http_build_query(array_merge($baseParams, ['page' => $i])) ?>"
+                       <?= $i == $page ? 'class="active"' : '' ?>>
+                        <?= $i ?>
+                    </a>
+                <?php endfor; ?>
+                
+                <?php if ($page < $total_pages): ?>
+                    <a href="smart_watches.php?<?= http_build_query(array_merge($baseParams, ['page' => $page+1])) ?>">
+                        <i class="fas fa-angle-right"></i>
+                    </a>
+                    <a href="smart_watches.php?<?= http_build_query(array_merge($baseParams, ['page' => $total_pages])) ?>">
+                        <i class="fas fa-angle-double-right"></i>
+                    </a>
+                <?php endif; ?>
+            </div>
+            <?php endif; ?>
+        </div>
+    </div>
+
+    <script>
+        // Перемикання підкатегорій
+        function toggleSubcategories(checkbox) {
+            const mainCat = checkbox.getAttribute('data-category');
+            const subcatDiv = document.getElementById('sub-' + mainCat.replace(/\s+/g, '-'));
+            subcatDiv.style.display = checkbox.checked ? 'block' : 'none';
+        }
+
+        // Ініціалізація підкатегорій
+        document.querySelectorAll('.main-category input').forEach(checkbox => {
+            toggleSubcategories(checkbox);
+        });
+
+        // Фільтри для мобільних
+        document.getElementById('filterToggle').addEventListener('click', function() {
+            document.getElementById('filtersForm').classList.toggle('visible');
+        });
+
+        // Сортування
+        function updateSort(sortValue) {
+            const url = new URL(window.location.href);
+            url.searchParams.set('sort', sortValue);
+            window.location.href = url.toString();
+        }
+    </script>
+</body>
+</html>

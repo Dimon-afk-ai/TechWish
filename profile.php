@@ -25,4 +25,4 @@ $page_title = 'Профиль пользователя';
 $show_profile_content = true; // Флаг для отображения профиля
 $profile_user = $user; // Передаем данные пользователя
 
-include 'header.php';
+include __DIR__.'/views/header_profile.html';

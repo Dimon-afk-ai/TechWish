@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Телевізори | TechWish</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../static/tv.css">
+</head>
+<body>
+<?php include('header.html'); ?>
+
+<!-- Верхний баннер -->
+<section class="promo-banner">
+    <div class="promo-content">
+        <h2>Знижки на телевізори!</h2>
+        <p>Сучасні Smart TV зі знижками до 30%. <a href="sales.php" class="promo-link">Переглянути пропозиції</a></p>
+    </div>
+</section>
+
+<!-- Основний контейнер -->
+<div class="main-container">
+    <!-- Фільтри -->
+    <div class="filters-column">
+        <button class="filter-btn" id="filterToggle">
+            <i class="fas fa-filter"></i> Фільтри
+        </button>
+        <form method="get" action="tv.php" class="filters-container" id="filtersForm">
+            <?php 
+            // Initialize variables if they don't exist
+            $categories = $categories ?? [];
+            $selectedCategories = $selectedCategories ?? [];
+            $price_min = $price_min ?? null;
+            $price_max = $price_max ?? null;
+            $screenSizes = $screenSizes ?? [];
+            $selectedScreenSizes = $selectedScreenSizes ?? [];
+            $brands = $brands ?? [];
+            $selectedBrands = $selectedBrands ?? [];
+            ?>
+            
+            <div class="filter-section">
+                <h3><i class="fas fa-list"></i> Категорії</h3>
+                <div class="filter-options">
+                    <?php if (!empty($categories)): ?>
+                        <?php foreach ($categories as $cat): ?>
+                            <label class="filter-checkbox">
+                                <input type="checkbox" name="category[]" value="<?php echo htmlspecialchars($cat); ?>" 
+                                    <?php echo in_array($cat, $selectedCategories) ? 'checked' : ''; ?>>
+                                <?php echo htmlspecialchars($cat); ?>
+                            </label>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <p>Немає доступних категорій</p>
+                    <?php endif; ?>
+                </div>
+            </div>
+
+            <div class="filter-section">
+                <h3><i class="fas fa-tag"></i> Ціна</h3>
+                <div class="price-range">
+                    <input type="number" name="price_min" placeholder="Від" 
+                           value="<?php echo $price_min !== null ? htmlspecialchars($price_min) : ''; ?>">
+                    <input type="number" name="price_max" placeholder="До" 
+                           value="<?php echo $price_max !== null ? htmlspecialchars($price_max) : ''; ?>">
+                </div>
+            </div>
+
+            <div class="filter-section">
+                <h3><i class="fas fa-tv"></i> Діагональ екрану</h3>
+                <div class="filter-options">
+                    <?php if (!empty($screenSizes)): ?>
+                        <?php foreach ($screenSizes as $size): ?>
+                            <label class="filter-checkbox">
+                                <input type="checkbox" name="screen_size[]" value="<?php echo htmlspecialchars($size); ?>" 
+                                    <?php echo in_array($size, $selectedScreenSizes) ? 'checked' : ''; ?>>
+                                <?php echo htmlspecialchars($size); ?>"
+                            </label>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <p>Немає доступних розмірів</p>
+                    <?php endif; ?>
+                </div>
+            </div>
+
+            <div class="filter-section">
+                <h3><i class="fas fa-industry"></i> Бренди</h3>
+                <div class="filter-options">
+                    <?php if (!empty($brands)): ?>
+                        <?php foreach ($brands as $brand): ?>
+                            <label class="filter-checkbox">
+                                <input type="checkbox" name="brand[]" value="<?php echo htmlspecialchars($brand); ?>" 
+                                    <?php echo in_array($brand, $selectedBrands) ? 'checked' : ''; ?>>
+                                <?php echo htmlspecialchars($brand); ?>
+                            </label>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <p>Немає доступних брендів</p>
+                    <?php endif; ?>
+                </div>
+            </div>
+
+            <div class="filter-section">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-filter"></i> Застосувати фільтри
+                </button>
+                <a href="tv.php" class="filter-reset">
+                    <i class="fas fa-times"></i> Скинути всі фільтри
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Основний контент -->
+    <div class="products-column">
+        <h1 class="page-title">
+            <i class="fas fa-tv"></i>
+            <span>Телевізори</span>
+        </h1>
+
+        <div class="sorting">
+            <div class="results-count">
+                Знайдено товарів: <?php echo isset($total_products) ? $total_products : 0; ?>
+            </div>
+            <select name="sort" class="sort-select" onchange="updateSort(this.value)">
+                <?php 
+                $sort = $sort ?? 'newest';
+                $queryParams = $_GET;
+                ?>
+                <option value="tv.php?<?php echo http_build_query(array_merge($queryParams, ['sort' => 'newest'])); ?>" 
+                    <?php echo $sort === 'newest' ? 'selected' : ''; ?>>Новітні</option>
+                <option value="tv.php?<?php echo http_build_query(array_merge($queryParams, ['sort' => 'price_asc'])); ?>" 
+                    <?php echo $sort === 'price_asc' ? 'selected' : ''; ?>>Від дешевих</option>
+                <option value="tv.php?<?php echo http_build_query(array_merge($queryParams, ['sort' => 'price_desc'])); ?>" 
+                    <?php echo $sort === 'price_desc' ? 'selected' : ''; ?>>Від дорогих</option>
+                <option value="tv.php?<?php echo http_build_query(array_merge($queryParams, ['sort' => 'popular'])); ?>" 
+                    <?php echo $sort === 'popular' ? 'selected' : ''; ?>>Популярні</option>
+            </select>
+        </div>
+
+        <div class="products-grid">
+            <?php if (empty($products)): ?>
+                <div class="no-results">
+                    <i class="fas fa-search"></i>
+                    <h3>Нічого не знайдено</h3>
+                    <p>Спробуйте змінити параметри фільтрації</p>
+                    <a href="tv.php" class="btn btn-primary" style="margin-top: 20px;">
+                        Показати всі товари
+                    </a>
+                </div>
+            <?php else: ?>
+                <?php foreach ($products as $product): ?>
+                    <div class="product-card">
+                        <div class="product-image-container">
+                            <img src="<?php echo htmlspecialchars($product['image_url']); ?>" 
+                                 alt="<?php echo htmlspecialchars($product['name']); ?>" 
+                                 class="product-image">
+                            <?php if (isset($product['is_new']) && $product['is_new']): ?>
+                                <span class="product-badge new">Новинка</span>
+                            <?php endif; ?>
+                            <?php if (isset($product['discount']) && $product['discount'] > 0): ?>
+                                <span class="product-badge sale">-<?php echo $product['discount']; ?>%</span>
+                            <?php endif; ?>
+                        </div>
+                        <div class="product-info">
+                            <div class="product-brand"><?php echo htmlspecialchars($product['brand']); ?></div>
+                            <h3 class="product-name"><?php echo htmlspecialchars($product['name']); ?></h3>
+                            <div class="product-specs">
+                                <?php if (isset($product['screen_size'])): ?>
+                                    <span class="product-spec">
+                                        <i class="fas fa-tv"></i> <?php echo htmlspecialchars($product['screen_size']); ?>" екран
+                                    </span>
+                                <?php endif; ?>
+                                <?php if (isset($product['resolution'])): ?>
+                                    <span class="product-spec">
+                                        <i class="fas fa-microchip"></i> <?php echo htmlspecialchars($product['resolution']); ?>
+                                    </span>
+                                <?php endif; ?>
+                                <span class="product-spec">
+                                    <i class="fas fa-wifi"></i> Smart TV: <?php echo isset($product['smart_tv']) && $product['smart_tv'] ? 'Так' : 'Ні'; ?>
+                                </span>
+                            </div>
+                            <div class="product-price">
+                                <?php if (isset($product['price'])): ?>
+                                    <?php echo number_format($product['price'], 0, '', ' '); ?> ₴
+                                    <?php if (isset($product['original_price']) && $product['original_price'] > $product['price']): ?>
+                                        <span class="old-price"><?php echo number_format($product['original_price'], 0, '', ' '); ?> ₴</span>
+                                    <?php endif; ?>
+                                <?php endif; ?>
+                            </div>
+                            <div class="product-actions">
+                                <a href="wishlist.php?action=add&id=<?php echo $product['id']; ?>" class="btn btn-outline">
+                                    <i class="far fa-heart"></i>
+                                </a>
+                                <a href="cart.php?action=add&id=<?php echo $product['id']; ?>" class="btn btn-primary">
+                                    <i class="fas fa-cart-plus"></i> Купити
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            <?php endif; ?>
+        </div>
+
+        <?php if (isset($total_products) && isset($per_page) && $total_products > $per_page): ?>
+        <div class="pagination">
+            <?php
+            $total_pages = ceil($total_products / $per_page);
+            $page = $page ?? 1;
+            $baseParams = $_GET;
+            unset($baseParams['page']);
+            
+            $start = max(1, $page - 2);
+            $end = min($total_pages, $start + 4);
+            if ($end - $start < 4) {
+                $start = max(1, $end - 4);
+            }
+            ?>
+    
+            <?php if ($page > 1): ?>
+                <a href="tv.php?<?php echo http_build_query(array_merge($baseParams, ['page' => 1])); ?>">
+                    &laquo;&laquo;
+                </a>
+                <a href="tv.php?<?php echo http_build_query(array_merge($baseParams, ['page' => $page - 1])); ?>">
+                    &laquo;
+                </a>
+            <?php endif; ?>
+    
+            <?php for ($i = $start; $i <= $end; $i++): ?>
+                <a href="tv.php?<?php echo http_build_query(array_merge($baseParams, ['page' => $i])); ?>"
+                   <?php echo $i == $page ? 'class="active"' : ''; ?>>
+                    <?php echo $i; ?>
+                </a>
+            <?php endfor; ?>
+    
+            <?php if ($page < $total_pages): ?>
+                <a href="tv.php?<?php echo http_build_query(array_merge($baseParams, ['page' => $page + 1])); ?>">
+                    &raquo;
+                </a>
+                <a href="tv.php?<?php echo http_build_query(array_merge($baseParams, ['page' => $total_pages])); ?>">
+                    &raquo;&raquo;
+                </a>
+            <?php endif; ?>
+        </div>
+        <?php endif; ?>
+    </div>
+</div>
+
+<script>
+    // Тоггл фильтров
+    document.getElementById('filterToggle').addEventListener('click', function() {
+        document.getElementById('filtersForm').classList.toggle('visible');
+    });
+
+    // Обновление сортировки
+    function updateSort(url) {
+        window.location.href = url;
+    }
+</script>
+</body>
+</html>

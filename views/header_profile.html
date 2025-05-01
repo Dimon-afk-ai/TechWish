@@ -1,0 +1,360 @@
+<?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+require_once __DIR__.'/../boot.php';
+
+// Получаем данные пользователя если авторизован
+$user = null;
+$avatar_path = '/images/default-avatar.jpg';
+
+if (isset($_SESSION['user_id'])) {
+    try {
+        $stmt = $pdo->prepare("SELECT * FROM users WHERE id = ?");
+        $stmt->execute([$_SESSION['user_id']]);
+        $user = $stmt->fetch();
+        
+        if ($user && !empty($user['avatar'])) {
+            $avatar_path = (strpos($user['avatar'], 'http') === 0) 
+                ? $user['avatar'] 
+                : '/' . ltrim($user['avatar'], '/');
+        }
+        
+        $avatar_path .= (strpos($avatar_path, '?') === false ? '?' : '&') . 't=' . time();
+    } catch (PDOException $e) {
+        error_log("Ошибка получения данных пользователя: " . $e->getMessage());
+    }
+}
+
+// Обработка сообщений
+$success_message = $_SESSION['success'] ?? null;
+$error_message = $_SESSION['error'] ?? null;
+unset($_SESSION['success'], $_SESSION['error']);
+?>
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><?= isset($user) ? htmlspecialchars($user['username']) : 'Профіль' ?> | TechWish</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../static/styles.css">
+    <link rel="stylesheet" href="../static/profile.css">
+    <link rel="stylesheet" href="../static/theme.js">
+</head>
+<body>
+    <header class="main-header">
+        <div class="container">
+            <a href="index.php" class="logo">
+                <i class="fas fa-microchip logo-icon"></i>
+                <span>TechWish</span>
+            </a>
+            <nav class="main-nav">
+                <ul>
+                    <li><a href="index.php"><i class="fas fa-home"></i> Головна</a></li>
+                    <li><a href="products.php"><i class="fas fa-laptop"></i> Товари</a></li>
+                    <li><a href="about.php"><i class="fas fa-info-circle"></i> Про нас</a></li>
+                    <li class="active"><a href="profile.php"><i class="fas fa-user"></i> Профіль</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <div class="page-wrapper">
+        <div class="container">
+            <div class="profile-card">
+                <?php if ($success_message): ?>
+                    <div class="alert alert-success">
+                        <i class="fas fa-check-circle"></i>
+                        <?= htmlspecialchars($success_message) ?>
+                    </div>
+                <?php endif; ?>
+                
+                <?php if ($error_message): ?>
+                    <div class="alert alert-error">
+                        <i class="fas fa-exclamation-circle"></i>
+                        <?= htmlspecialchars($error_message) ?>
+                    </div>
+                <?php endif; ?>
+
+                <?php if ($user): ?>
+                    <div class="profile-header">
+                        <div class="avatar-container">
+                            <div class="avatar-wrapper">
+                                <img src="<?= htmlspecialchars($avatar_path) ?>" alt="Аватар" class="profile-avatar" id="avatarPreview">
+                                <div class="avatar-overlay">
+                                    <label for="avatar" class="avatar-change-btn">
+                                        <i class="fas fa-camera"></i>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="profile-info">
+                            <h2><?= htmlspecialchars($user['username']) ?></h2>
+                            <p class="joined-date">
+                                <i class="fas fa-calendar-alt"></i> 
+                                Зареєстрований з: <?= date('d.m.Y', strtotime($user['created_at'])) ?>
+                            </p>
+                            <?php if (!empty($user['bio'])): ?>
+                                <p class="user-bio"><?= htmlspecialchars($user['bio']) ?></p>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+
+                    <div class="profile-tabs">
+                        <div class="tab-header">
+                            <button class="tab-btn active" data-tab="main-info">
+                                <i class="fas fa-user"></i> Основна інформація
+                            </button>
+                            <button class="tab-btn" data-tab="security">
+                                <i class="fas fa-lock"></i> Безпека
+                            </button>
+                            <button class="tab-btn" data-tab="preferences">
+                                <i class="fas fa-cog"></i> Налаштування
+                            </button>
+                        </div>
+
+                        <div class="tab-content">
+                            <div class="tab-pane active" id="main-info">
+                                <form action="update_profile.php" method="post" enctype="multipart/form-data" class="profile-form">
+                                    <div class="form-group hidden">
+                                        <input type="file" id="avatar" name="avatar" onchange="previewAvatar(this)">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="username">
+                                            <i class="fas fa-user"></i> Ім'я користувача:
+                                        </label>
+                                        <input type="text" id="username" name="username" value="<?= htmlspecialchars($user['username']) ?>">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="email">
+                                            <i class="fas fa-envelope"></i> Email:
+                                        </label>
+                                        <input type="email" id="email" name="email" value="<?= htmlspecialchars($user['email'] ?? '') ?>">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="bio">
+                                            <i class="fas fa-comment-alt"></i> Про себе:
+                                        </label>
+                                        <textarea id="bio" name="bio" rows="3"><?= htmlspecialchars($user['bio'] ?? '') ?></textarea>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="location">
+                                            <i class="fas fa-map-marker-alt"></i> Місцезнаходження:
+                                        </label>
+                                        <input type="text" id="location" name="location" value="<?= htmlspecialchars($user['location'] ?? '') ?>">
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-save"></i> Зберегти зміни
+                                    </button>
+                                </form>
+                            </div>
+
+                            <div class="tab-pane" id="security">
+                                <form action="change_password.php" method="post" class="profile-form">
+                                    <div class="form-group">
+                                        <label for="current_password">
+                                            <i class="fas fa-key"></i> Поточний пароль:
+                                        </label>
+                                        <input type="password" id="current_password" name="current_password" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="new_password">
+                                            <i class="fas fa-key"></i> Новий пароль:
+                                        </label>
+                                        <input type="password" id="new_password" name="new_password" required>
+                                        <div class="password-strength">
+                                            <div class="strength-bar"></div>
+                                            <p class="strength-text">Надійність пароля</p>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="confirm_password">
+                                            <i class="fas fa-key"></i> Підтвердіть пароль:
+                                        </label>
+                                        <input type="password" id="confirm_password" name="confirm_password" required>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-exchange-alt"></i> Змінити пароль
+                                    </button>
+                                </form>
+                            </div>
+
+                            <div class="tab-pane" id="preferences">
+                                <form action="/update_preferences.php" method="post" class="profile-form">
+                                    <div class="form-group">
+                                        <label for="theme">
+                                            <i class="fas fa-palette"></i> Тема оформлення:
+                                        </label>
+                                        <select id="theme" name="theme">
+                                            <option value="dark" <?= ($user['theme'] ?? '') == 'dark' ? 'selected' : '' ?>>Темна</option>
+                                            <option value="light" <?= ($user['theme'] ?? '') == 'light' ? 'selected' : '' ?>>Світла</option>
+                                            <option value="cyberpunk" <?= ($user['theme'] ?? '') == 'cyberpunk' ? 'selected' : '' ?>>Кіберпанк</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="notifications">
+                                            <i class="fas fa-bell"></i> Повідомлення:
+                                        </label>
+                                        <div class="checkbox-group">
+                                            <div class="checkbox-item">
+                                                <input type="checkbox" id="notification_email" name="notification_email" <?= ($user['notification_email'] ?? false) ? 'checked' : '' ?>>
+                                                <label for="notification_email">Email</label>
+                                            </div>
+                                            <div class="checkbox-item">
+                                                <input type="checkbox" id="notification_site" name="notification_site" <?= ($user['notification_site'] ?? false) ? 'checked' : '' ?>>
+                                                <label for="notification_site">На сайті</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>
+                                            <i class="fas fa-eye"></i> Приватність:
+                                        </label>
+                                        <div class="radio-group">
+                                            <div class="radio-item">
+                                                <input type="radio" id="privacy_public" name="privacy" value="public" <?= ($user['privacy'] ?? '') == 'public' ? 'checked' : '' ?>>
+                                                <label for="privacy_public">Публічний профіль</label>
+                                            </div>
+                                            <div class="radio-item">
+                                                <input type="radio" id="privacy_private" name="privacy" value="private" <?= ($user['privacy'] ?? '') == 'private' ? 'checked' : '' ?>>
+                                                <label for="privacy_private">Приватний профіль</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-save"></i> Зберегти налаштування
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="profile-actions">
+                        <a href="index.php" class="btn btn-secondary">
+                            <i class="fas fa-home"></i> На головну
+                        </a>
+                        <a href="logout.php" class="btn btn-danger">
+                            <i class="fas fa-sign-out-alt"></i> Вийти
+                        </a>
+                    </div>
+                <?php else: ?>
+                    <div class="login-prompt">
+                        <i class="fas fa-user-lock login-icon"></i>
+                        <h2>Доступ заборонено</h2>
+                        <p>Будь ласка, <a href="login.php">увійдіть</a> або <a href="register.php">зареєструйтесь</a> для перегляду профілю.</p>
+                        <a href="login.php" class="btn btn-primary">
+                            <i class="fas fa-sign-in-alt"></i> Увійти
+                        </a>
+                    </div>
+                <?php endif; ?>
+            </div>
+        </div>
+    </div>
+
+    <footer class="main-footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <i class="fas fa-microchip logo-icon"></i>
+                    <span>TechWish</span>
+                </div>
+                <div class="footer-links">
+                    <ul>
+                        <li><a href="terms.php">Умови використання</a></li>
+                        <li><a href="privacy.php">Політика конфіденційності</a></li>
+                        <li><a href="contact.php">Контакти</a></li>
+                    </ul>
+                </div>
+                <div class="social-links">
+                    <a href="#" class="social-link"><i class="fab fa-facebook"></i></a>
+                    <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
+                    <a href="#" class="social-link"><i class="fab fa-telegram"></i></a>
+                </div>
+            </div>
+            <div class="copyright">
+                &copy; <?= date('Y') ?> TechWish. Всі права захищені.
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Preview avatar change
+        function previewAvatar(input) {
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('avatarPreview').src = e.target.result;
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        // Tab navigation
+        document.addEventListener('DOMContentLoaded', function() {
+            const tabButtons = document.querySelectorAll('.tab-btn');
+            const tabPanes = document.querySelectorAll('.tab-pane');
+
+            tabButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    // Remove active class from all buttons and panes
+                    tabButtons.forEach(btn => btn.classList.remove('active'));
+                    tabPanes.forEach(pane => pane.classList.remove('active'));
+                    
+                    // Add active class to current button
+                    this.classList.add('active');
+                    
+                    // Show the corresponding tab pane
+                    const tabId = this.getAttribute('data-tab');
+                    document.getElementById(tabId).classList.add('active');
+                });
+            });
+
+            // Password strength meter
+            const passwordInput = document.getElementById('new_password');
+            const strengthBar = document.querySelector('.strength-bar');
+            const strengthText = document.querySelector('.strength-text');
+
+            if (passwordInput) {
+                passwordInput.addEventListener('input', function() {
+                    const password = this.value;
+                    let strength = 0;
+                    
+                    if (password.length > 6) strength += 1;
+                    if (password.length > 10) strength += 1;
+                    if (/[A-Z]/.test(password)) strength += 1;
+                    if (/[0-9]/.test(password)) strength += 1;
+                    if (/[!@#$%^&*]/.test(password)) strength += 1;
+
+                    // Update strength bar
+                    const strengthPercent = (strength / 5) * 100;
+                    strengthBar.style.width = strengthPercent + '%';
+                    
+                    // Update color and text
+                    if (strength < 2) {
+                        strengthBar.style.backgroundColor = '#ff3366';
+                        strengthText.textContent = 'Слабкий пароль';
+                    } else if (strength < 4) {
+                        strengthBar.style.backgroundColor = '#ffa500';
+                        strengthText.textContent = 'Середній пароль';
+                    } else {
+                        strengthBar.style.backgroundColor = '#00cc66';
+                        strengthText.textContent = 'Надійний пароль';
+                    }
+                });
+            }
+
+            // Avatar overlay effect
+            const avatarContainer = document.querySelector('.avatar-container');
+            const avatarChangeBtn = document.querySelector('.avatar-change-btn');
+
+            if (avatarContainer && avatarChangeBtn) {
+                avatarChangeBtn.addEventListener('click', function() {
+                    document.getElementById('avatar').click();
+                });
+            }
+        });
+    </script>
+</body>
+</html>

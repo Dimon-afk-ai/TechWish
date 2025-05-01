@@ -39,6 +39,7 @@ function pdo(): PDO
     return $pdo;
 }
 
+
 // Функция для вывода flash-сообщений
 function flash(?string $message = null)
 {
