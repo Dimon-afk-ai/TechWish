@@ -1,15 +1,15 @@
+
 <?php
 session_start();
 require_once __DIR__.'/boot.php';
 
 // Инициализация переменной $error
 
-
 include ('models/header.php');
-include ('controllers/smartphone.php');
+include ('controllers/tv.php');
 
-$smartphone = new SmartphoneController();
-$smartphone->getAll($pdo,$avatar);
+$computers = new TVMediaController();
+$computers->getAll($pdo,$avatar);
 
 
 

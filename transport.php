@@ -6,9 +6,9 @@ require_once __DIR__.'/boot.php';
 
 
 include ('models/header.php');
-include ('controllers/homecomfort.php');
+include ('controllers/transport.php');
 
-$product = new HomeAppliancesController();
+$product = new TransportController();
 $product->getAll($pdo,$avatar);
        
 

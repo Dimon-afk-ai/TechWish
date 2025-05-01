@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Геймінг | TechWish</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="../static/gaming.css">
+</head>
+<body>
+<?php include('header.html'); ?>
+
+    <!-- Промо-баннер вверху страницы -->
+    <div class="promo-banner">
+        <div class="promo-content">
+            <i class="fas fa-gift"></i> Знижка 15% на всі ігрові аксесуари до кінця місяця! 
+            <a href="promotions.php" class="promo-link">Дізнатися більше</a>
+        </div>
+    </div>
+
+    <div class="main-container">
+        <div class="filters-column">
+            <button class="filter-btn" id="filterToggle">
+                <i class="fas fa-filter"></i> Фільтри
+            </button>
+            
+            <form method="get" action="gaming.php" class="filters-container" id="filtersForm">
+                <div class="filter-section">
+                    <h3><i class="fas fa-gamepad"></i> Категорії</h3>
+                    <div class="filter-options">
+                        <?php foreach ($categories as $cat): ?>
+                            <label class="filter-checkbox">
+                                <input type="checkbox" name="category[]" value="<?php echo $cat; ?>" 
+                                    <?php echo in_array($cat, $selectedCategories) ? 'checked' : ''; ?>>
+                                <?php echo $cat; ?>
+                            </label>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+                
+                <div class="filter-section">
+                    <h3><i class="fas fa-tag"></i> Ціна</h3>
+                    <div class="price-range">
+                        <input type="number" name="price_min" placeholder="Від" 
+                               value="<?php echo $price_min !== null ? $price_min : ''; ?>">
+                        <input type="number" name="price_max" placeholder="До" 
+                               value="<?php echo $price_max !== null ? $price_max : ''; ?>">
+                    </div>
+                </div>
+                
+                <div class="filter-section">
+                    <h3><i class="fas fa-industry"></i> Бренди</h3>
+                    <div class="filter-options">
+                        <?php foreach ($brands as $brand): ?>
+                            <label class="filter-checkbox">
+                                <input type="checkbox" name="brand[]" value="<?php echo $brand; ?>" 
+                                    <?php echo in_array($brand, $selectedBrands) ? 'checked' : ''; ?>>
+                                <?php echo $brand; ?>
+                            </label>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+                
+                <div class="filter-section">
+                    <h3><i class="fas fa-layer-group"></i> Тип</h3>
+                    <div class="filter-options">
+                        <?php foreach ($types as $type): ?>
+                            <label class="filter-checkbox">
+                                <input type="checkbox" name="type[]" value="<?php echo $type; ?>" 
+                                    <?php echo in_array($type, $selectedTypes) ? 'checked' : ''; ?>>
+                                <?php echo $type; ?>
+                            </label>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+                
+                <div class="filter-section">
+                    <h3><i class="fas fa-tv"></i> Платформа</h3>
+                    <div class="filter-options">
+                        <?php foreach ($platforms as $platform): ?>
+                            <label class="filter-checkbox">
+                                <input type="checkbox" name="platform[]" value="<?php echo $platform; ?>" 
+                                    <?php echo in_array($platform, $selectedPlatforms) ? 'checked' : ''; ?>>
+                                <?php echo $platform; ?>
+                            </label>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+                
+                <div class="filter-section">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-filter"></i> Застосувати
+                    </button>
+                    <a href="gaming.php" class="filter-reset">
+                        <i class="fas fa-times"></i> Скинути фільтри
+                    </a>
+                </div>
+            </form>
+        </div>
+        
+        <div class="products-column">
+            <h1 class="page-title">
+                <i class="fas fa-gamepad"></i>
+                <span>Геймінг</span>
+            </h1>
+            
+            <!-- Категории геймерских товаров -->
+            <div class="categories-grid">
+                <a href="gaming.php?category[]=Консолі" class="category-card">
+                    <i class="fas fa-gamepad category-icon"></i>
+                    <div class="category-name">Консолі</div>
+                </a>
+                <a href="gaming.php?category[]=Ігри" class="category-card">
+                    <i class="fas fa-compact-disc category-icon"></i>
+                    <div class="category-name">Ігри</div>
+                </a>
+                <a href="gaming.php?category[]=Контролери" class="category-card">
+                    <i class="fas fa-hockey-puck category-icon"></i>
+                    <div class="category-name">Контролери</div>
+                </a>
+                <a href="gaming.php?category[]=Гарнітури" class="category-card">
+                    <i class="fas fa-headset category-icon"></i>
+                    <div class="category-name">Гарнітури</div>
+                </a>
+                <a href="gaming.php?category[]=Аксесуари" class="category-card">
+                    <i class="fas fa-keyboard category-icon"></i>
+                    <div class="category-name">Аксесуари</div>
+                </a>
+            </div>
+            
+            <div class="sorting">
+                <div class="results-count">
+                    Знайдено товарів: <strong><?php echo $total_products; ?></strong>
+                </div>
+                <select name="sort" class="sort-select" onchange="location = this.value;">
+                    <option value="gaming.php?<?php echo http_build_query(array_merge($_GET, ['sort' => 'newest'])); ?>" 
+                        <?php echo $sort === 'newest' ? 'selected' : ''; ?>>Новітні</option>
+                    <option value="gaming.php?<?php echo http_build_query(array_merge($_GET, ['sort' => 'price_asc'])); ?>" 
+                        <?php echo $sort === 'price_asc' ? 'selected' : ''; ?>>Від дешевих</option>
+                    <option value="gaming.php?<?php echo http_build_query(array_merge($_GET, ['sort' => 'price_desc'])); ?>" 
+                        <?php echo $sort === 'price_desc' ? 'selected' : ''; ?>>Від дорогих</option>
+                    <option value="gaming.php?<?php echo http_build_query(array_merge($_GET, ['sort' => 'popular'])); ?>" 
+                        <?php echo $sort === 'popular' ? 'selected' : ''; ?>>Популярні</option>
+                </select>
+            </div>
+            
+            <div class="products-grid">
+                <?php if (empty($products)): ?>
+                    <div class="no-results">
+                        <i class="fas fa-search"></i>
+                        <h3>Нічого не знайдено</h3>
+                        <p>Спробуйте змінити параметри фільтрації</p>
+                        <a href="gaming.php" class="btn btn-primary" style="margin-top: 20px;">
+                            Показати всі товари
+                        </a>
+                    </div>
+                <?php else: ?>
+                    <?php foreach ($products as $product): ?>
+                        <div class="product-card">
+                            <?php if (isset($product['is_new']) && $product['is_new']): ?>
+                                <div class="product-badge new">Новинка</div>
+                            <?php endif; ?>
+                            <?php if (isset($product['discount']) && $product['discount'] > 0): ?>
+                                <div class="product-badge sale">-<?php echo $product['discount']; ?>%</div>
+                            <?php endif; ?>
+                            
+                            <div class="product-image-container">
+                                <img src="<?php echo htmlspecialchars($product['image_url']); ?>" 
+                                     alt="<?php echo htmlspecialchars($product['name']); ?>" 
+                                     class="product-image">
+                            </div>
+                            <div class="product-info">
+                                <div class="product-brand"><?php echo htmlspecialchars($product['brand']); ?></div>
+                                <h3 class="product-name"><?php echo htmlspecialchars($product['name']); ?></h3>
+                                
+                                <?php if (isset($product['rating'])): ?>
+                                <div class="product-rating">
+                                    <div class="stars">
+                                        <?php for ($i = 1; $i <= 5; $i++): ?>
+                                            <?php if ($i <= round($product['rating'])): ?>
+                                                <i class="fas fa-star"></i>
+                                            <?php else: ?>
+                                                <i class="far fa-star"></i>
+                                            <?php endif; ?>
+                                        <?php endfor; ?>
+                                    </div>
+                                    <span class="rating-count">(<?php echo $product['review_count'] ?? 0; ?>)</span>
+                                </div>
+                                <?php endif; ?>
+                                
+                                <div class="product-specs">
+                                    <span class="product-spec">
+                                        <i class="fas fa-box"></i> <?php echo htmlspecialchars($product['category']); ?>
+                                    </span>
+                                    
+                                    <?php if (!empty($product['platform'])): ?>
+                                    <span class="product-spec">
+                                        <i class="fas fa-tv"></i> <?php echo htmlspecialchars($product['platform']); ?>
+                                    </span>
+                                    <?php endif; ?>
+                                    
+                                    <?php if (!empty($product['features'])): ?>
+                                    <span class="product-spec">
+                                        <i class="fas fa-star"></i> <?php echo htmlspecialchars($product['features']); ?>
+                                    </span>
+                                    <?php endif; ?>
+                                    
+                                    <?php if (!empty($product['connection_type'])): ?>
+                                    <span class="product-spec">
+                                        <i class="fas fa-plug"></i> <?php echo htmlspecialchars($product['connection_type']); ?>
+                                    </span>
+                                    <?php endif; ?>
+                                </div>
+                                
+                                <div class="product-price">
+                                    <?php if (isset($product['old_price']) && $product['old_price'] > $product['price']): ?>
+                                        <span class="old-price"><?php echo number_format($product['old_price'], 0, '', ' '); ?> ₴</span>
+                                    <?php endif; ?>
+                                    <?php echo number_format($product['price'], 0, '', ' '); ?> ₴
+                                </div>
+                                
+                                <div class="product-actions">
+                                    <a href="wishlist.php?action=add&id=<?php echo $product['id']; ?>" class="btn btn-outline" 
+                                       onclick="addToWishlist(<?php echo $product['id']; ?>); return false;">
+                                        <i class="far fa-heart"></i>
+                                    </a>
+                                    <a href="cart.php?action=add&id=<?php echo $product['id']; ?>" class="btn btn-primary"
+                                       onclick="addToCart(<?php echo $product['id']; ?>); return false;">
+                                        <i class="fas fa-cart-plus"></i> Купити
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </div>
+            
+            <?php if ($total_products > $per_page): ?>
+            <div class="pagination">
+                <?php
+                $total_pages = ceil($total_products / $per_page);
+                $baseParams = $_GET;
+                unset($baseParams['page']);
+                
+                $start = max(1, $page - 2);
+                $end = min($total_pages, $start + 4);
+                if ($end - $start < 4) {
+                    $start = max(1, $end - 4);
+                }
+                ?>
+        
+                <?php if ($page > 1): ?>
+                    <a href="gaming.php?<?php echo http_build_query(array_merge($baseParams, ['page' => 1])); ?>">
+                        &laquo;&laquo;
+                    </a>
+                    <a href="gaming.php?<?php echo http_build_query(array_merge($baseParams, ['page' => $page - 1])); ?>">
+                        &laquo;
+                    </a>
+                <?php endif; ?>
+        
+                <?php for ($i = $start; $i <= $end; $i++): ?>
+                    <a href="gaming.php?<?php echo http_build_query(array_merge($baseParams, ['page' => $i])); ?>"
+                       <?php echo $i == $page ? 'class="active"' : ''; ?>>
+                        <?php echo $i; ?>
+                    </a>
+                <?php endfor; ?>
+        
+                <?php if ($page < $total_pages): ?>
+                    <a href="gaming.php?<?php echo http_build_query(array_merge($baseParams, ['page' => $page + 1])); ?>">
+                        &raquo;
+                    </a>
+                    <a href="gaming.php?<?php echo http_build_query(array_merge($baseParams, ['page' => $total_pages])); ?>">
+                        &raquo;&raquo;
+                    </a>
+                <?php endif; ?>
+            </div>
+            <?php endif; ?>
+        </div>
+    </div>
+
+    <!-- Уведомление о добавлении в корзину -->
+    <div class="toast-notification success" id="cartNotification">
+        <div class="toast-icon"><i class="fas fa-check-circle"></i></div>
+        <div class="toast-message">Товар додано до кошика!</div>
+        <button class="toast-close" onclick="hideNotification()"><i class="fas fa-times"></i></button>
+    </div>
+
+    <!-- Уведомление о добавлении в список желаний -->
+    <div class="toast-notification success" id="wishlistNotification">
+        <div class="toast-icon"><i class="fas fa-heart"></i></div>
+        <div class="toast-message">Товар додано до списку бажань!</div>
+        <button class="toast-close" onclick="hideWishlistNotification()"><i class="fas fa-times"></i></button>
+    </div>
+
+    <!-- Кнопка прокрутки вверх -->
+    <div class="scroll-to-top" id="scrollTop">
+        <i class="fas fa-arrow-up"></i>
+    </div>
+
+    <!-- Подвал сайта -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>Інформація</h3>
+                <a href="about.php"><i class="fas fa-info-circle"></i> Про нас</a>
+                <a href="delivery.php"><i class="fas fa-truck"></i> Доставка</a>
+                <a href="warranty.php"><i class="fas fa-shield-alt"></i> Гарантія</a>
+                <a href="contact.php"><i class="fas fa-envelope"></i> Контакти</a>
+                <a href="blog.php"><i class="fas fa-newspaper"></i> Блог</a>
+            </div>
+            
+            <div class="footer-section">
+                <h3>Категорії</h3>
+                <a href="smartphones.php"><i class="fas fa-mobile-alt"></i> Смартфони</a>
+                <a href="laptops.php"><i class="fas fa-laptop"></i> Ноутбуки</a>
+                <a href="gaming.php"><i class="fas fa-gamepad"></i> Геймінг</a>
+                <a href="accessories.php"><i class="fas fa-headphones"></i> Аксесуари</a>
+                <a href="smart-home.php"><i class="fas fa-home"></i> Розумний дім</a>
+            </div>
+            
+            <div class="footer-section">
+                <h3>Аккаунт</h3>
+                <a href="login.php"><i class="fas fa-sign-in-alt"></i> Увійти</a>
+                <a href="register.php"><i class="fas fa-user-plus"></i> Реєстрація</a>
+                <a href="orders.php"><i class="fas fa-clipboard-list"></i> Мої замовлення</a>
+                <a href="wishlist.php"><i class="fas fa-heart"></i> Список бажань</a>
+                <a href="cart.php"><i class="fas fa-shopping-cart"></i> Кошик</a>
+            </div>
+            
+            <div class="footer-section">
+                <h3>Залишайтеся на зв'язку</h3>
+                <p>Підписуйтесь на наші соціальні мережі, щоб бути в курсі останніх новинок та акцій.</p>
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-telegram"></i></a>
+                    <a href="#"><i class="fab fa-youtube"></i></a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="copyright">
+            &copy; <?php echo date('Y'); ?> TechWish. Всі права захищені.
+        </div>
+    </footer>
+
+    <script>
+        // Toggle filters on mobile
+        document.getElementById('filterToggle').addEventListener('click', function() {
+            document.getElementById('filtersForm').classList.toggle('visible');
+        });
+        
+        // Update sort parameter
+        function updateSort(sortValue) {
+            window.location.href = sortValue;
+        }
+        
+        // Validate price range
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const priceMin = document.querySelector('input[name="price_min"]');
+            const priceMax = document.querySelector('input[name="price_max"]');
+            
+            if (priceMin.value && priceMax.value && parseFloat(priceMin.value) > parseFloat(priceMax.value)) {
+                alert('Максимальна ціна повинна бути більше мінімальної');
+                e.preventDefault();
+            }
+        });
+        
+        // Функция для добавления в корзину
+        function addToCart(productId) {
+            // AJAX запрос для добавления товара в корзину
+            // В реальном проекте здесь будет запрос к серверу
+            
+            console.log("Товар " + productId + " добавлен в корзину");
+            
+            // Показываем уведомление
+            const notification = document.getElementById('cartNotification');
+            notification.classList.add('show');
+            
+            // Скрываем через 3 секунды
+            setTimeout(function() {
+                notification.classList.remove('show');
+            }, 3000);
+            
+            return false;
+        }
+        
+        // Функция для добавления в список желаний
+        function addToWishlist(productId) {
+            // AJAX запрос для добавления товара в список желаний
+            // В реальном проекте здесь будет запрос к серверу
+            
+            console.log("Товар " + productId + " добавлен в список желаний");
+            
+            // Показываем уведомление
+            const notification = document.getElementById('wishlistNotification');
+            notification.classList.add('show');
+            
+            // Скрываем через 3 секунды
+            setTimeout(function() {
+                notification.classList.remove('show');
+            }, 3000);
+            
+            return false;
+        }
+        
+        // Скрыть уведомление о корзине вручную
+        function hideNotification() {
+            document.getElementById('cartNotification').classList.remove('show');
+        }
+        
+        // Скрыть уведомление о списке желаний вручную
+        function hideWishlistNotification() {
+            document.getElementById('wishlistNotification').classList.remove('show');
+        }
+        
+        // Показать/скрыть кнопку прокрутки вверх
+        window.addEventListener('scroll', function() {
+            const scrollTop = document.getElementById('scrollTop');
+            if (window.pageYOffset > 300) {
+                scrollTop.classList.add('visible');
+            } else {
+                scrollTop.classList.remove('visible');
+            }
+        });
+        
+        // Прокрутка вверх при клике на кнопку
+        document.getElementById('scrollTop').addEventListener('click', function() {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+    </script>
+</body>
+</html>
