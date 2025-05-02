@@ -103,9 +103,6 @@ class ProductModel
 				$count_sql .= " AND storage IN ($placeholders)";
 				$count_params = array_merge($count_params, $storages);
 			}
-var_dump($count_sql);
-var_dump($count_params);
-
 			$count_stmt = $pdo->prepare($count_sql);
 			$count_stmt->execute($count_params);
 			$total_products = $count_stmt->fetchColumn();
