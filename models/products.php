@@ -60,8 +60,9 @@ class ProductModel
 			$stmt->execute($params);
 			$products = $stmt->fetchAll(PDO::FETCH_ASSOC);
 			// Получаем общее количество товаров (для пагинации)
-			$count_sql = "SELECT COUNT(*) FROM products WHERE 1=1";
-			$count_params = [];
+
+			$count_sql = "SELECT * FROM products WHERE category = ?";
+			$count_params[] =  $category;
 
 			// Те же условия фильтрации, что и для основного запроса
 			if (!empty($brands)) {
