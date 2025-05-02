@@ -66,9 +66,8 @@ class ProductModel
 			$stmt->execute($params);
 			$products = $stmt->fetchAll(PDO::FETCH_ASSOC);
 			// Получаем общее количество товаров (для пагинации)
-
-			$count_sql = "SELECT count(id) FROM products WHERE category = ?";
-			$count_params[] =  $category;
+			$count_sql = "SELECT COUNT(*) FROM products WHERE 1=1";
+			$count_params = [];
 
 			// Те же условия фильтрации, что и для основного запроса
 			if (!empty($subcategory)) {
@@ -109,11 +108,11 @@ class ProductModel
 
 			$count_stmt = $pdo->prepare($count_sql);
 			$count_stmt->execute($count_params);
-
 			$total_products = $count_stmt->fetchColumn();
 
 		} catch (PDOException $e) {
 			$error = "Ошибка базы данных: " . $e->getMessage();
+			error_log($error);
 		}
 		// Отладочная информация (можно удалить после тестирования)
 		if (empty($products)) {
