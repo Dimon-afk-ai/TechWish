@@ -25,12 +25,12 @@ class ProductModel
 			$params = array_merge($params, $brands);
 		}
 
-		if ($price_min !== null) {
+		if ($price_min !== null && !empty($price_min)) {
 			$sql .= " AND price >= ?";
 			$params[] = $price_min;
 		}
 
-		if ($price_max !== null) {
+		if ($price_max !== null && !empty($price_max)) {
 			$sql .= " AND price <= ?";
 			$params[] = $price_max;
 		}
@@ -66,13 +66,11 @@ class ProductModel
 			$stmt->execute($params);
 			$products = $stmt->fetchAll(PDO::FETCH_ASSOC);
 			// Получаем общее количество товаров (для пагинации)
-			$count_sql = "SELECT COUNT(*) FROM products WHERE 1=1";
-			$count_params = [];
+			$count_sql = "SELECT COUNT(*) FROM products WHERE category = ?";
+			$count_params [] = $category;
 
 			// Те же условия фильтрации, что и для основного запроса
 			if (!empty($subcategory)) {
-				//echo"<pre>";
-
 				$placeholders = implode(',', array_fill(0, count($subcategory), '?'));
 				$count_sql .= " AND subcategory IN ($placeholders)";
 				$count_params = array_merge($count_params, $subcategory);
@@ -84,12 +82,12 @@ class ProductModel
 				$count_params = array_merge($count_params, $brands);
 			}
 
-			if ($price_min !== null) {
+			if ($price_min !== null && !empty($price_min)) {
 				$count_sql .= " AND price >= ?";
 				$count_params[] = $price_min;
 			}
 
-			if ($price_max !== null) {
+			if ($price_max !== null && !empty($price_max)) {
 				$count_sql .= " AND price <= ?";
 				$count_params[] = $price_max;
 			}
@@ -105,6 +103,8 @@ class ProductModel
 				$count_sql .= " AND storage IN ($placeholders)";
 				$count_params = array_merge($count_params, $storages);
 			}
+var_dump($count_sql);
+var_dump($count_params);
 
 			$count_stmt = $pdo->prepare($count_sql);
 			$count_stmt->execute($count_params);
