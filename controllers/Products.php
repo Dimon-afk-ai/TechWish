@@ -8,6 +8,7 @@ class ProductController
 		$this->model = new ProductModel();
 		// Параметры фильтрации
 		$brands = isset($_GET['brand']) ? (array)$_GET['brand'] : [];
+		$subcategory = isset($_GET['subcategory']) ? (array)$_GET['subcategory'] : [];
 		$price_min = isset($_GET['price_min']) ? floatval($_GET['price_min']) : null;
 		$price_max = isset($_GET['price_max']) ? floatval($_GET['price_max']) : null;
 		$rams = isset($_GET['ram']) ? array_map('intval', (array)$_GET['ram']) : [];
@@ -19,6 +20,7 @@ class ProductController
 		$per_page = 10;
 		$this->params = array(
 			'brands' => $brands,
+			'subcategory' => $subcategory,
 			'price_min' => $price_min,
 			'price_max' => $price_max,
 			'rams' => $rams,

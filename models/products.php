@@ -12,7 +12,13 @@ class ProductModel
 		$params[] =  $category;
 		
 
-// Добавляем условия фильтрации
+		// Добавляем условия фильтрации
+		if (!empty($subcategory)) {
+			$placeholders = implode(',', array_fill(0, count($subcategory), '?'));
+			$sql .= " AND subcategory IN ($placeholders)";
+			$params = array_merge($params, $subcategory);
+		}
+
 		if (!empty($brands)) {
 			$placeholders = implode(',', array_fill(0, count($brands), '?'));
 			$sql .= " AND brand IN ($placeholders)";
@@ -60,10 +66,19 @@ class ProductModel
 			$stmt->execute($params);
 			$products = $stmt->fetchAll(PDO::FETCH_ASSOC);
 			// Получаем общее количество товаров (для пагинации)
-			$count_sql = "SELECT COUNT(*) FROM products WHERE 1=1";
-			$count_params = [];
+
+			$count_sql = "SELECT count(id) FROM products WHERE category = ?";
+			$count_params[] =  $category;
 
 			// Те же условия фильтрации, что и для основного запроса
+			if (!empty($subcategory)) {
+				//echo"<pre>";
+
+				$placeholders = implode(',', array_fill(0, count($subcategory), '?'));
+				$count_sql .= " AND subcategory IN ($placeholders)";
+				$count_params = array_merge($count_params, $subcategory);
+			}
+
 			if (!empty($brands)) {
 				$placeholders = implode(',', array_fill(0, count($brands), '?'));
 				$count_sql .= " AND brand IN ($placeholders)";
@@ -94,11 +109,11 @@ class ProductModel
 
 			$count_stmt = $pdo->prepare($count_sql);
 			$count_stmt->execute($count_params);
+
 			$total_products = $count_stmt->fetchColumn();
 
 		} catch (PDOException $e) {
 			$error = "Ошибка базы данных: " . $e->getMessage();
-			error_log($error);
 		}
 		// Отладочная информация (можно удалить после тестирования)
 		if (empty($products)) {
