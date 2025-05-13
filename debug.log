@@ -198,3 +198,28 @@
 [2025-04-09 11:16:06] DB connected successfully
 [2025-04-09 11:16:17] Attempting DB connection
 [2025-04-09 11:16:17] DB connected successfully
+[2025-05-13 18:29:31] Attempting DB connection
+[2025-05-13 18:29:31] DB connected successfully
+[2025-05-13 18:29:57] Attempting DB connection
+[2025-05-13 18:29:57] DB connected successfully
+[2025-05-13 18:29:57] Received POST data: Array
+(
+    [username] => БоьшойХуй
+    [password] => 1111
+    [register] => 
+)
+
+[2025-05-13 18:29:57] Validation error: Пароль должен быть не менее 6 символов
+[2025-05-13 18:29:57] Attempting DB connection
+[2025-05-13 18:29:57] DB connected successfully
+[2025-05-13 18:30:08] Attempting DB connection
+[2025-05-13 18:30:08] DB connected successfully
+[2025-05-13 18:30:08] Received POST data: Array
+(
+    [username] => Хуй
+    [password] => 123456
+    [register] => 
+)
+
+[2025-05-13 18:30:08] Trying to register user: Хуй
+[2025-05-13 18:30:08] User registered successfully. ID: 15
