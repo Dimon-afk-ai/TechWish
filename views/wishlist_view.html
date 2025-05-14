@@ -1,0 +1,928 @@
+<?php
+/**
+ * TeshWish - Wishlist View Template
+ * 
+ * This template handles the display of user wishlists
+ */
+
+// Ensure we have a valid session and user is logged in
+if (!isset($_SESSION['user_id'])) {
+    // Redirect to login if not logged in
+    header('Location: login.php');
+    exit;
+}
+
+// Get user ID from session
+$user_id = $_SESSION['user_id'];
+
+// Get wishlist ID from URL parameter if viewing a specific wishlist
+$wishlist_id = isset($_GET['id']) ? intval($_GET['id']) : null;
+
+// Default to showing user's primary wishlist if no ID specified
+if (!$wishlist_id) {
+    // Get user's default wishlist ID
+    $stmt = $pdo->prepare("SELECT id FROM wishlists WHERE user_id = ? AND is_default = 1 LIMIT 1");
+    $stmt->execute([$user_id]);
+    $default_wishlist = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+    if ($default_wishlist) {
+        $wishlist_id = $default_wishlist['id'];
+    } else {
+        // If no default wishlist found, create one
+        $stmt = $pdo->prepare("INSERT INTO wishlists (user_id, name, is_default, created_at) VALUES (?, 'My Wishlist', 1, NOW())");
+        $stmt->execute([$user_id]);
+        $wishlist_id = $pdo->lastInsertId();
+    }
+}
+
+// Get wishlist details
+$stmt = $pdo->prepare("
+    SELECT w.*, u.username, u.display_name 
+    FROM wishlists w
+    JOIN users u ON w.user_id = u.id
+    WHERE w.id = ?
+");
+$stmt->execute([$wishlist_id]);
+$wishlist = $stmt->fetch(PDO::FETCH_ASSOC);
+
+// Check if wishlist exists and user has permission to view it
+if (!$wishlist || ($wishlist['user_id'] != $user_id && $wishlist['visibility'] == 'private')) {
+    // Redirect or show error message
+    $_SESSION['error'] = "You don't have permission to view this wishlist.";
+    header('Location: dashboard.php');
+    exit;
+}
+
+// Get all wishlists for the current user (for the sidebar)
+$stmt = $pdo->prepare("SELECT * FROM wishlists WHERE user_id = ? ORDER BY is_default DESC, name ASC");
+$stmt->execute([$user_id]);
+$user_wishlists = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// Get items in the current wishlist
+$stmt = $pdo->prepare("
+    SELECT wi.*, p.name, p.description, p.price, p.image_url, p.url, 
+           c.name as category_name
+    FROM wishlist_items wi
+    JOIN products p ON wi.product_id = p.id
+    LEFT JOIN categories c ON p.category_id = c.id
+    WHERE wi.wishlist_id = ?
+    ORDER BY wi.priority DESC, wi.added_at DESC
+");
+$stmt->execute([$wishlist_id]);
+$items = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// Get wishlist sharing options
+$stmt = $pdo->prepare("SELECT * FROM wishlist_shares WHERE wishlist_id = ?");
+$stmt->execute([$wishlist_id]);
+$shares = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// Handle wishlist sorting
+$sort = isset($_GET['sort']) ? $_GET['sort'] : 'priority';
+$direction = isset($_GET['direction']) ? $_GET['direction'] : 'DESC';
+
+// Validate sorting parameters
+$valid_sorts = ['priority', 'price', 'name', 'added_at'];
+$valid_directions = ['ASC', 'DESC'];
+
+if (!in_array($sort, $valid_sorts)) {
+    $sort = 'priority';
+}
+
+if (!in_array($direction, $valid_directions)) {
+    $direction = 'DESC';
+}
+
+// Apply sorting
+$sorted_items = $items;
+usort($sorted_items, function($a, $b) use ($sort, $direction) {
+    if ($direction == 'ASC') {
+        return $a[$sort] <=> $b[$sort];
+    } else {
+        return $b[$sort] <=> $a[$sort];
+    }
+});
+
+// Generate share URL if wishlist is public or shared
+$share_url = '';
+if ($wishlist['visibility'] != 'private') {
+    $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http";
+    $share_url = $protocol . "://" . $_SERVER['HTTP_HOST'] . "/shared_wishlist.php?id=" . $wishlist_id . "&key=" . $wishlist['share_key'];
+}
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><?php echo htmlspecialchars($wishlist['name']); ?> - TeshWish</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <?php include('includes/header.php'); ?>
+    
+    <div class="container">
+        <div class="wishlist-container">
+            <div class="wishlist-header">
+                <div>
+                    <h1 class="wishlist-title"><?php echo htmlspecialchars($wishlist['name']); ?></h1>
+                    <p class="wishlist-owner">
+                        <?php if ($wishlist['user_id'] == $user_id): ?>
+                            Your wishlist
+                        <?php else: ?>
+                            Created by <?php echo htmlspecialchars($wishlist['display_name']); ?>
+                        <?php endif; ?>
+                    </p>
+                </div>
+                
+                <?php if ($wishlist['user_id'] == $user_id): ?>
+                <div class="wishlist-actions">
+                    <button class="btn btn-secondary" id="shareWishlistBtn">
+                        <i class="fas fa-share-alt"></i> Share
+                    </button>
+                    <button class="btn btn-primary" id="addItemBtn">
+                        <i class="fas fa-plus"></i> Add Item
+                    </button>
+                    <button class="btn btn-accent" id="editWishlistBtn">
+                        <i class="fas fa-edit"></i> Edit
+                    </button>
+                </div>
+                <?php endif; ?>
+            </div>
+            
+            <!-- Wishlist Description -->
+            <?php if (!empty($wishlist['description'])): ?>
+            <div class="wishlist-description mb-20">
+                <?php echo nl2br(htmlspecialchars($wishlist['description'])); ?>
+            </div>
+            <?php endif; ?>
+            
+            <!-- Sorting Options -->
+            <div class="wishlist-sorting mb-20">
+                <form method="get" action="" class="flex flex-center gap-10">
+                    <input type="hidden" name="id" value="<?php echo $wishlist_id; ?>">
+                    <label for="sort">Sort by:</label>
+                    <select name="sort" id="sort" class="form-control" style="width: auto;">
+                        <option value="priority" <?php echo $sort == 'priority' ? 'selected' : ''; ?>>Priority</option>
+                        <option value="price" <?php echo $sort == 'price' ? 'selected' : ''; ?>>Price</option>
+                        <option value="name" <?php echo $sort == 'name' ? 'selected' : ''; ?>>Name</option>
+                        <option value="added_at" <?php echo $sort == 'added_at' ? 'selected' : ''; ?>>Date Added</option>
+                    </select>
+                    <select name="direction" id="direction" class="form-control" style="width: auto;">
+                        <option value="DESC" <?php echo $direction == 'DESC' ? 'selected' : ''; ?>>Highest to Lowest</option>
+                        <option value="ASC" <?php echo $direction == 'ASC' ? 'selected' : ''; ?>>Lowest to Highest</option>
+                    </select>
+                    <button type="submit" class="btn btn-primary">Apply</button>
+                </form>
+            </div>
+            
+            <?php if (empty($sorted_items)): ?>
+                <div class="text-center mt-20 mb-20">
+                    <p>This wishlist is empty! Add some items to get started.</p>
+                    <?php if ($wishlist['user_id'] == $user_id): ?>
+                        <button class="btn btn-primary mt-10" id="addFirstItemBtn">
+                            <i class="fas fa-plus"></i> Add Your First Item
+                        </button>
+                    <?php endif; ?>
+                </div>
+            <?php else: ?>
+                <!-- Wishlist Items Grid -->
+                <div class="wishlist-grid">
+                    <?php foreach ($sorted_items as $item): ?>
+                        <div class="wishlist-item" data-id="<?php echo $item['id']; ?>">
+                            <?php if (!empty($item['image_url'])): ?>
+                                <img src="<?php echo htmlspecialchars($item['image_url']); ?>" alt="<?php echo htmlspecialchars($item['name']); ?>" class="wishlist-item-image">
+                            <?php else: ?>
+                                <div class="wishlist-item-image-placeholder">
+                                    <i class="fas fa-gift"></i>
+                                </div>
+                            <?php endif; ?>
+                            
+                            <div class="wishlist-item-content">
+                                <h3 class="wishlist-item-title"><?php echo htmlspecialchars($item['name']); ?></h3>
+                                
+                                <?php if (!empty($item['price'])): ?>
+                                    <div class="wishlist-item-price">
+                                        <?php echo number_format($item['price'], 2); ?> €
+                                    </div>
+                                <?php endif; ?>
+                                
+                                <?php if (!empty($item['description'])): ?>
+                                    <div class="wishlist-item-description">
+                                        <?php echo nl2br(htmlspecialchars(substr($item['description'], 0, 100))); ?>
+                                        <?php echo (strlen($item['description']) > 100) ? '...' : ''; ?>
+                                    </div>
+                                <?php endif; ?>
+                                
+                                <!-- Priority indicator -->
+                                <div class="wishlist-item-priority mb-10">
+                                    <?php
+                                    $priority_labels = [
+                                        1 => 'Low',
+                                        2 => 'Medium',
+                                        3 => 'High',
+                                        4 => 'Must Have'
+                                    ];
+                                    $priority_colors = [
+                                        1 => '#999999',
+                                        2 => '#3498db',
+                                        3 => '#f39c12',
+                                        4 => '#e74c3c'
+                                    ];
+                                    $priority = isset($item['priority']) ? intval($item['priority']) : 1;
+                                    $priority = max(1, min(4, $priority)); // Ensure it's between 1-4
+                                    ?>
+                                    <span class="priority-badge" style="background-color: <?php echo $priority_colors[$priority]; ?>">
+                                        <?php echo $priority_labels[$priority]; ?> Priority
+                                    </span>
+                                </div>
+                                
+                                <div class="wishlist-item-actions">
+                                    <?php if (!empty($item['url'])): ?>
+                                        <a href="<?php echo htmlspecialchars($item['url']); ?>" target="_blank" class="btn btn-primary btn-sm">
+                                            <i class="fas fa-external-link-alt"></i> View
+                                        </a>
+                                    <?php endif; ?>
+                                    
+                                    <?php if ($wishlist['user_id'] == $user_id): ?>
+                                        <button class="btn btn-accent btn-sm edit-item-btn" data-id="<?php echo $item['id']; ?>">
+                                            <i class="fas fa-edit"></i> Edit
+                                        </button>
+                                        <button class="btn btn-secondary btn-sm remove-item-btn" data-id="<?php echo $item['id']; ?>">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    <?php endif; ?>
+                                    
+                                    <?php if ($wishlist['user_id'] != $user_id): ?>
+                                        <button class="btn btn-secondary btn-sm mark-purchased-btn" data-id="<?php echo $item['id']; ?>" 
+                                                <?php echo ($item['purchased'] || $item['reserved_by']) ? 'disabled' : ''; ?>>
+                                            <?php if ($item['purchased']): ?>
+                                                <i class="fas fa-check"></i> Purchased
+                                            <?php elseif ($item['reserved_by']): ?>
+                                                <i class="fas fa-clock"></i> Reserved
+                                            <?php else: ?>
+                                                <i class="fas fa-gift"></i> Mark as Buying
+                                            <?php endif; ?>
+                                        </button>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            <?php endif; ?>
+        </div>
+    </div>
+    
+    <!-- Share Wishlist Modal -->
+    <div id="shareWishlistModal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Share Your Wishlist</h2>
+            
+            <div class="form-group">
+                <label for="visibility">Visibility:</label>
+                <select id="visibility" class="form-control">
+                    <option value="private" <?php echo $wishlist['visibility'] == 'private' ? 'selected' : ''; ?>>Private (Only you)</option>
+                    <option value="shared" <?php echo $wishlist['visibility'] == 'shared' ? 'selected' : ''; ?>>Shared (Only people with link)</option>
+                    <option value="public" <?php echo $wishlist['visibility'] == 'public' ? 'selected' : ''; ?>>Public (Anyone can find)</option>
+                </select>
+            </div>
+            
+            <div id="shareUrlContainer" class="form-group <?php echo $wishlist['visibility'] == 'private' ? 'hidden' : ''; ?>">
+                <label>Share URL:</label>
+                <div class="flex">
+                    <input type="text" class="form-control" id="shareUrl" value="<?php echo htmlspecialchars($share_url); ?>" readonly>
+                    <button class="btn btn-primary" id="copyShareUrl">Copy</button>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>Share with specific people:</label>
+                <div class="flex mb-10">
+                    <input type="email" class="form-control" id="shareEmail" placeholder="Enter email address">
+                    <button class="btn btn-primary" id="addShareEmail">Add</button>
+                </div>
+                
+                <div id="sharedEmailsList">
+                    <?php foreach ($shares as $share): ?>
+                        <div class="shared-email-item" data-id="<?php echo $share['id']; ?>">
+                            <span><?php echo htmlspecialchars($share['email']); ?></span>
+                            <button class="btn btn-accent btn-sm remove-share-btn">Remove</button>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+            
+            <div class="form-actions">
+                <button class="btn btn-primary" id="saveShareSettings">Save Settings</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Add/Edit Item Modal -->
+    <div id="itemModal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2 id="itemModalTitle">Add New Item</h2>
+            
+            <form id="itemForm">
+                <input type="hidden" id="item_id" value="">
+                
+                <div class="form-group">
+                    <label for="item_name">Name *</label>
+                    <input type="text" id="item_name" class="form-control" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="item_price">Price</label>
+                    <input type="number" id="item_price" class="form-control" step="0.01" min="0">
+                </div>
+                
+                <div class="form-group">
+                    <label for="item_url">URL (where to buy)</label>
+                    <input type="url" id="item_url" class="form-control">
+                </div>
+                
+                <div class="form-group">
+                    <label for="item_image">Image URL</label>
+                    <input type="url" id="item_image" class="form-control">
+                </div>
+                
+                <div class="form-group">
+                    <label for="item_priority">Priority</label>
+                    <select id="item_priority" class="form-control">
+                        <option value="1">Low</option>
+                        <option value="2">Medium</option>
+                        <option value="3">High</option>
+                        <option value="4">Must Have</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="item_description">Description</label>
+                    <textarea id="item_description" class="form-control" rows="5"></textarea>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary" id="saveItemBtn">Save Item</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Edit Wishlist Modal -->
+    <div id="editWishlistModal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Edit Wishlist</h2>
+            
+            <form id="editWishlistForm">
+                <div class="form-group">
+                    <label for="wishlist_name">Name *</label>
+                    <input type="text" id="wishlist_name" class="form-control" value="<?php echo htmlspecialchars($wishlist['name']); ?>" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="wishlist_description">Description</label>
+                    <textarea id="wishlist_description" class="form-control" rows="5"><?php echo htmlspecialchars($wishlist['description']); ?></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="is_default" <?php echo $wishlist['is_default'] ? 'checked disabled' : ''; ?>>
+                        <?php if ($wishlist['is_default']): ?>
+                            This is your default wishlist
+                        <?php else: ?>
+                            Make this my default wishlist
+                        <?php endif; ?>
+                    </label>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary" id="saveWishlistBtn">Save Changes</button>
+                    <button type="button" class="btn btn-accent" id="deleteWishlistBtn" <?php echo $wishlist['is_default'] ? 'disabled' : ''; ?>>
+                        Delete Wishlist
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <?php include('includes/footer.php'); ?>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Share Wishlist Modal
+            const shareWishlistBtn = document.getElementById('shareWishlistBtn');
+            const shareWishlistModal = document.getElementById('shareWishlistModal');
+            const visibility = document.getElementById('visibility');
+            const shareUrlContainer = document.getElementById('shareUrlContainer');
+            const shareUrl = document.getElementById('shareUrl');
+            const copyShareUrl = document.getElementById('copyShareUrl');
+            const shareEmail = document.getElementById('shareEmail');
+            const addShareEmail = document.getElementById('addShareEmail');
+            const sharedEmailsList = document.getElementById('sharedEmailsList');
+            const saveShareSettings = document.getElementById('saveShareSettings');
+            
+            // Add Item Modal
+            const addItemBtn = document.getElementById('addItemBtn');
+            const addFirstItemBtn = document.getElementById('addFirstItemBtn');
+            const itemModal = document.getElementById('itemModal');
+            const itemForm = document.getElementById('itemForm');
+            const itemModalTitle = document.getElementById('itemModalTitle');
+            const itemId = document.getElementById('item_id');
+            const itemName = document.getElementById('item_name');
+            const itemPrice = document.getElementById('item_price');
+            const itemUrl = document.getElementById('item_url');
+            const itemImage = document.getElementById('item_image');
+            const itemPriority = document.getElementById('item_priority');
+            const itemDescription = document.getElementById('item_description');
+            const saveItemBtn = document.getElementById('saveItemBtn');
+            
+            // Edit Wishlist Modal
+            const editWishlistBtn = document.getElementById('editWishlistBtn');
+            const editWishlistModal = document.getElementById('editWishlistModal');
+            const editWishlistForm = document.getElementById('editWishlistForm');
+            const wishlistName = document.getElementById('wishlist_name');
+            const wishlistDescription = document.getElementById('wishlist_description');
+            const isDefault = document.getElementById('is_default');
+            const saveWishlistBtn = document.getElementById('saveWishlistBtn');
+            const deleteWishlistBtn = document.getElementById('deleteWishlistBtn');
+            
+            // Close buttons
+            const closeButtons = document.querySelectorAll('.close');
+            
+            // Edit Item Buttons
+            const editItemBtns = document.querySelectorAll('.edit-item-btn');
+            
+            // Remove Item Buttons
+            const removeItemBtns = document.querySelectorAll('.remove-item-btn');
+            
+            // Mark as Purchased Buttons
+            const markPurchasedBtns = document.querySelectorAll('.mark-purchased-btn');
+            
+            // Remove Share Buttons
+            const removeShareBtns = document.querySelectorAll('.remove-share-btn');
+            
+            // Open Share Wishlist Modal
+            if (shareWishlistBtn) {
+                shareWishlistBtn.addEventListener('click', function() {
+                    shareWishlistModal.classList.remove('hidden');
+                });
+            }
+            
+            // Handle visibility change
+            if (visibility) {
+                visibility.addEventListener('change', function() {
+                    if (this.value === 'private') {
+                        shareUrlContainer.classList.add('hidden');
+                    } else {
+                        shareUrlContainer.classList.remove('hidden');
+                        
+                        // Generate new share URL if visibility changed from private
+                        if (shareUrl.value === '') {
+                            generateShareUrl();
+                        }
+                    }
+                });
+            }
+            
+            // Copy share URL
+            if (copyShareUrl) {
+                copyShareUrl.addEventListener('click', function() {
+                    shareUrl.select();
+                    document.execCommand('copy');
+                    alert('Share URL copied to clipboard!');
+                });
+            }
+            
+            // Add share email
+            if (addShareEmail) {
+                addShareEmail.addEventListener('click', function() {
+                    const email = shareEmail.value.trim();
+                    if (email === '') return;
+                    
+                    // Validate email
+                    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                    if (!emailRegex.test(email)) {
+                        alert('Please enter a valid email address');
+                        return;
+                    }
+                    
+                    // Check if email already exists
+                    const existingEmails = Array.from(sharedEmailsList.querySelectorAll('.shared-email-item span'))
+                        .map(span => span.textContent.trim());
+                    
+                    if (existingEmails.includes(email)) {
+                        alert('This email is already in the list');
+                        return;
+                    }
+                    
+                    // Create new shared email item
+                    const shareItem = document.createElement('div');
+                    shareItem.className = 'shared-email-item';
+                    shareItem.innerHTML = `
+                        <span>${email}</span>
+                        <button class="btn btn-accent btn-sm remove-share-btn">Remove</button>
+                    `;
+                    
+                    // Add remove button event listener
+                    const removeBtn = shareItem.querySelector('.remove-share-btn');
+                    removeBtn.addEventListener('click', function() {
+                        shareItem.remove();
+                    });
+                    
+                    sharedEmailsList.appendChild(shareItem);
+                    shareEmail.value = '';
+                });
+            }
+            
+            // Save share settings
+            if (saveShareSettings) {
+                saveShareSettings.addEventListener('click', function() {
+                    const visibilityValue = visibility.value;
+                    const emails = Array.from(sharedEmailsList.querySelectorAll('.shared-email-item span'))
+                        .map(span => span.textContent.trim());
+                    
+                    // Save settings via AJAX
+                    fetch('api/save_share_settings.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            wishlist_id: <?php echo $wishlist_id; ?>,
+                            visibility: visibilityValue,
+                            shared_emails: emails
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            alert('Share settings saved successfully!');
+                            
+                            // Update share URL if new one was generated
+                            if (data.share_url) {
+                                shareUrl.value = data.share_url;
+                            }
+                            
+                            // Close modal
+                            shareWishlistModal.classList.add('hidden');
+                            
+                            // Reload page to reflect changes
+                            window.location.reload();
+                        } else {
+                            alert('Error: ' + data.message);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('An error occurred while saving share settings');
+                    });
+                });
+            }
+            
+            // Open Add Item Modal
+            if (addItemBtn) {
+                addItemBtn.addEventListener('click', function() {
+                    // Reset form
+                    itemForm.reset();
+                    itemId.value = '';
+                    itemModalTitle.textContent = 'Add New Item';
+                    
+                    // Set default priority
+                    itemPriority.value = '2'; // Medium
+                    
+                    // Open modal
+                    itemModal.classList.remove('hidden');
+                });
+            }
+            
+            // Open Add First Item Button
+            if (addFirstItemBtn) {
+                addFirstItemBtn.addEventListener('click', function() {
+                    // Reset form
+                    itemForm.reset();
+                    itemId.value = '';
+                    itemModalTitle.textContent = 'Add Your First Item';
+                    
+                    // Set default priority
+                    itemPriority.value = '2'; // Medium
+                    
+                    // Open modal
+                    itemModal.classList.remove('hidden');
+                });
+            }
+            
+            // Edit Item Button Click
+            editItemBtns.forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    const id = this.getAttribute('data-id');
+                    
+                    // Get item data via AJAX
+                    fetch('api/get_item.php?id=' + id)
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.success) {
+                                // Fill form with item data
+                                itemId.value = data.item.id;
+                                itemName.value = data.item.name;
+                                itemPrice.value = data.item.price;
+                                itemUrl.value = data.item.url;
+                                itemImage.value = data.item.image_url;
+                                itemPriority.value = data.item.priority;
+                                itemDescription.value = data.item.description;
+                                
+                                // Update modal title
+                                itemModalTitle.textContent = 'Edit Item';
+                                
+                                // Open modal
+                                itemModal.classList.remove('hidden');
+                            } else {
+                                alert('Error: ' + data.message);
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            alert('An error occurred while fetching item data');
+                        });
+                });
+            });
+            
+            // Remove Item Button Click
+            removeItemBtns.forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    if (!confirm('Are you sure you want to remove this item from your wishlist?')) {
+                        return;
+                    }
+                    
+                    const id = this.getAttribute('data-id');
+                    
+                    // Remove item via AJAX
+                    fetch('api/remove_item.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            item_id: id
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Remove item from DOM
+                            const item = document.querySelector(`.wishlist-item[data-id="${id}"]`);
+                            item.remove();
+                            
+                            // Show message if wishlist is now empty
+                            if (document.querySelectorAll('.wishlist-item').length === 0) {
+                                const emptyMessage = document.createElement('div');
+                                emptyMessage.className = 'text-center mt-20 mb-20';
+                                emptyMessage.innerHTML = `
+                                    <p>This wishlist is empty! Add some items to get started.</p>
+                                    <button class="btn btn-primary mt-10" id="addFirstItemBtn">
+                                        <i class="fas fa-plus"></i> Add Your First Item
+                                    </button>
+                                `;
+                                
+                                document.querySelector('.wishlist-grid').replaceWith(emptyMessage);
+                                
+                                // Add event listener to new button
+                                document.getElementById('addFirstItemBtn').addEventListener('click', function() {
+                                    // Reset form
+                                    itemForm.reset();
+                                    itemId.value = '';
+                                    itemModalTitle.textContent = 'Add Your First Item';
+                                    
+                                    // Set default priority
+                                    itemPriority.value = '2'; // Medium
+                                    
+                                    // Open modal
+                                    itemModal.classList.remove('hidden');
+                                });
+                            }
+                        } else {
+                            alert('Error: ' + data.message);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('An error occurred while removing the item');
+                    });
+                });
+            });
+            
+            // Save Item Form Submit
+            if (itemForm) {
+                itemForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    // Validate form
+                    if (itemName.value.trim() === '') {
+                        alert('Please enter a name for the item');
+                        return;
+                    }
+                    
+                    // Collect form data
+                    const formData = {
+                        wishlist_id: <?php echo $wishlist_id; ?>,
+                        name: itemName.value.trim(),
+                        price: itemPrice.value !== '' ? parseFloat(itemPrice.value) : null,
+                        url: itemUrl.value.trim(),
+                        image_url: itemImage.value.trim(),
+                        priority: parseInt(itemPriority.value),
+                        description: itemDescription.value.trim()
+                    };
+                    
+                    // Add item ID if editing
+                    if (itemId.value !== '') {
+                        formData.id = itemId.value;
+                    }
+                    
+                    // Save item via AJAX
+                    fetch('api/save_item.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(formData)
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Close modal
+                            itemModal.classList.add('hidden');
+                            
+                            // Reload page to show updated item
+                            window.location.reload();
+                        } else {
+                            alert('Error: ' + data.message);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('An error occurred while saving the item');
+                    });
+                });
+            }
+            
+            // Open Edit Wishlist Modal
+            if (editWishlistBtn) {
+                editWishlistBtn.addEventListener('click', function() {
+                    editWishlistModal.classList.remove('hidden');
+                });
+            }
+            
+            // Save Wishlist Form Submit
+            if (editWishlistForm) {
+                editWishlistForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    // Validate form
+                    if (wishlistName.value.trim() === '') {
+                        alert('Please enter a name for the wishlist');
+                        return;
+                    }
+                    
+                    // Collect form data
+                    const formData = {
+                        wishlist_id: <?php echo $wishlist_id; ?>,
+                        name: wishlistName.value.trim(),
+                        description: wishlistDescription.value.trim(),
+                        is_default: isDefault.checked
+                    };
+                    
+                    // Save wishlist via AJAX
+                    fetch('api/save_wishlist.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(formData)
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Close modal
+                            editWishlistModal.classList.add('hidden');
+                            
+                            // Reload page to show updated wishlist
+                            window.location.reload();
+                        } else {
+                            alert('Error: ' + data.message);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('An error occurred while saving the wishlist');
+                    });
+                });
+            }
+            
+            // Delete Wishlist Button Click
+            if (deleteWishlistBtn) {
+                deleteWishlistBtn.addEventListener('click', function() {
+                    if (!confirm('Are you sure you want to delete this wishlist? This action cannot be undone!')) {
+                        return;
+                    }
+                    
+                    // Delete wishlist via AJAX
+                    fetch('api/delete_wishlist.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            wishlist_id: <?php echo $wishlist_id; ?>
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Redirect to dashboard
+                            window.location.href = 'dashboard.php';
+                        } else {
+                            alert('Error: ' + data.message);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('An error occurred while deleting the wishlist');
+                    });
+                });
+            }
+            
+            // Mark as Purchased Button Click
+            markPurchasedBtns.forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    const id = this.getAttribute('data-id');
+                    
+                    // Toggle purchased status via AJAX
+                    fetch('api/toggle_purchased.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            item_id: id
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Update button text
+                            this.innerHTML = '<i class="fas fa-check"></i> Purchased';
+                            this.disabled = true;
+                        } else {
+                            alert('Error: ' + data.message);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('An error occurred while marking item as purchased');
+                    });
+                });
+            });
+            
+            // Close buttons
+            closeButtons.forEach(function(btn) {
+                btn.addEventListener('click', function() {
+                    // Close all modals
+                    const modals = document.querySelectorAll('.modal');
+                    modals.forEach(function(modal) {
+                        modal.classList.add('hidden');
+                    });
+                });
+            });
+            
+            // Generate share URL function
+            function generateShareUrl() {
+                fetch('api/generate_share_url.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        wishlist_id: <?php echo $wishlist_id; ?>
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        shareUrl.value = data.share_url;
+                    } else {
+                        alert('Error: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while generating share URL');
+                });
+            }
+        });
+    </script>
+</body>
+</html>
