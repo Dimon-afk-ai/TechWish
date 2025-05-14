@@ -120,4 +120,42 @@ class ProductModel
 		return array('products'=>$products,'error'=>$error, 'total_products'=>$total_products);
 
 	}
+
+	public function getBrands($category,$pdo){
+		$sql = "SELECT DISTINCT(brand) FROM products WHERE category = ?";
+		$params[] =  $category;
+		$stmt = $pdo->prepare($sql);
+		$stmt->execute($params);
+		$brands = $stmt->fetchAll(PDO::FETCH_COLUMN);
+		return $brands;
+
+	}
+	public function getAllCategories($pdo){
+		$sql = "SELECT DISTINCT(category) FROM products";
+		$stmt = $pdo->prepare($sql);
+		$stmt->execute();
+		$categories = $stmt->fetchAll(PDO::FETCH_COLUMN);
+		return $categories;
+
+	}
+	
+	public function getCategoryID($category, $pdo){
+		$sql = "SELECT id FROM categories WHERE name = ?";
+		$params[] =  $category;
+		$stmt = $pdo->prepare($sql);
+		$stmt->execute($params);
+		$categoryID = $stmt->fetchAll(PDO::FETCH_COLUMN);
+		return $categoryID[0];
+
+	}
+	public function getAllSubCategories($categoryId,$pdo){
+		$sql = "SELECT 	name FROM subcategories WHERE categoryID  = ?";
+		$params[] =  $categoryId;
+		$stmt = $pdo->prepare($sql);
+		$stmt->execute($params);
+		$subCategories = $stmt->fetchAll(PDO::FETCH_COLUMN);
+		return $subCategories;
+
+	}
+	
 }

@@ -36,9 +36,14 @@ class ProductController
 	{
 		$products = $this->model->getAll($this->params,$pdo);
 		extract($this->params);
-
-		$allBrands = ['Apple', 'Samsung', 'Xiaomi', 'Huawei', 'OnePlus', 'Realme', 'Oppo', 'Vivo', 'Google', 'Asus'];
-		$allCategories = ['Холодильники', 'Плити', 'Посудомийки', 'Мікрохвильовки', 'Кавоварки', 'Блендери', 'Мультиварки', 'Мясорубки'];
+		
+		//echo "<pre>";
+		//var_dump($brands);
+		$categoryID = $this->model->getCategoryID($category, $pdo);
+	
+		$allSubCategories = $this->model->getAllSubCategories($categoryID, $pdo);
+		
+		//$allCategories = ['Холодильники', 'Плити', 'Посудомийки', 'Мікрохвильовки', 'Кавоварки', 'Блендери', 'Мультиварки', 'Мясорубки'];
 		$allTypes = ['Вбудована', 'Окремостояча', 'Компактна', 'Професійна'];
 		$allRams = [4, 6, 8, 12, 16];
 		$allStorages = [64, 128, 256, 512, 1024];
@@ -47,8 +52,7 @@ class ProductController
 			'avatar' => $avatar,
 			'products' => $products['products'],
 			'error' => $products['error'],
-			'brands' => $allBrands,
-			'categories' => $allCategories,
+			'subcategories' => $allSubCategories,
 			'selectedCategories' => [],
 			'rams' => $allRams,
 			'storages' => $allStorages,
@@ -59,14 +63,16 @@ class ProductController
 			'selectedRams' => $rams,
 			'selectedStorages' => $storages
 		];
-		
+		$brands = $this->model->getBrands($category,$pdo);
 		$total_products = $products['total_products'];
 		extract($templateData);
 		switch ($category){
 			case "smartphones":
+				$brands = ['Apple', 'Samsung', 'Xiaomi', 'Huawei', 'OnePlus', 'Realme', 'Oppo', 'Vivo', 'Google', 'Asus'];
 				include __DIR__.'/../views/smartphones.html';
 				break;
 			case "kitchen":
+				//$brands = ['afafasf', 'Samsung', 'Xiaomi', 'Huawei', 'OnePlus', 'Realme', 'Oppo', 'Vivo', 'Google', 'Asus'];
 				include __DIR__.'/../views/kitchen-tech.html';
 				break;
 
