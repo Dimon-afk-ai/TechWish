@@ -97,7 +97,7 @@ nav {
 }
 
 .logo-icon {
-    color: #ff0000; /* Червоний колір */
+    color: #ff0000;
     animation: pulse 2s infinite;
 }
 
@@ -135,7 +135,6 @@ nav {
     padding-left: 15px;
 }
 
-/* Стилизованный заголовок с линией */
 .page-title::before {
     content: '';
     position: absolute;
@@ -183,7 +182,6 @@ nav {
     gap: 10px;
 }
 
-/* Стилизованные чекбоксы */
 .filter-checkbox {
     display: flex;
     align-items: center;
@@ -266,7 +264,6 @@ nav {
     gap: 25px;
 }
 
-/* Анимация для карточек продуктов */
 .product-card {
     background: white;
     border-radius: 10px;
@@ -290,24 +287,25 @@ nav {
     padding-top: 100%;
     background: #f9f9f9;
     overflow: hidden;
+    display: flex;
 }
 
 .product-image {
     position: absolute;
-    top: 0;
-    left: 0;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     width: 100%;
     height: 100%;
     object-fit: contain;
-    padding: 20px;
     transition: transform var(--transition-normal);
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
 }
 
 .product-card:hover .product-image {
-    transform: scale(1.05);
+    transform: translate(-50%, -50%) scale(1.05);
 }
 
-/* Бейджик "Новинка" */
 .product-badge {
     position: absolute;
     top: 10px;
@@ -380,7 +378,6 @@ nav {
     background: var(--secondary);
 }
 
-/* Рейтинг товара */
 .product-rating {
     display: flex;
     align-items: center;
@@ -408,7 +405,6 @@ nav {
     gap: 5px;
 }
 
-/* Старая цена для акционных товаров */
 .old-price {
     text-decoration: line-through;
     color: var(--gray-500);
@@ -439,7 +435,6 @@ nav {
     overflow: hidden;
 }
 
-/* Эффект волны при нажатии на кнопку */
 .btn::after {
     content: '';
     position: absolute;
@@ -536,7 +531,6 @@ footer {
     overflow: hidden;
 }
 
-/* Волнистый эффект в подвале */
 footer::before {
     content: '';
     position: absolute;
@@ -778,7 +772,6 @@ footer::before {
     color: #BBDEFB;
 }
 
-/* Эффект для значка корзины */
 .cart-badge {
     position: relative;
     display: inline-flex;
@@ -800,7 +793,6 @@ footer::before {
     font-weight: bold;
 }
 
-/* Новые карточки категорий */
 .categories-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -841,7 +833,6 @@ footer::before {
     font-weight: 500;
 }
 
-/* Верхний баннер для акций */
 .promo-banner {
     background: linear-gradient(to right, var(--primary-dark), var(--primary));
     color: white;
@@ -888,7 +879,6 @@ footer::before {
     margin-left: 10px;
 }
 
-/* Кнопка прокрутки вверх */
 .scroll-to-top {
     position: fixed;
     bottom: 20px;
@@ -920,7 +910,6 @@ footer::before {
     box-shadow: 0 5px 15px rgba(0,0,0,0.3);
 }
 
-/* Кнопка переключения темы */
 .theme-switch {
     padding: 6px;
     background: var(--gray-200);
@@ -954,7 +943,6 @@ footer::before {
     background: var(--gray-800);
 }
 
-/* Темная тема (заготовка) */
 body.dark-theme {
     background-color: var(--gray-800);
     color: var(--gray-200);
@@ -1033,7 +1021,6 @@ body.dark-theme {
     }
 }
 
-/* Стилизация для поля поиска */
 .search-container {
     position: relative;
     width: 100%;
@@ -1070,7 +1057,6 @@ body.dark-theme {
     color: var(--primary);
 }
 
-/* Уведомление о добавлении в корзину */
 .toast-notification {
     position: fixed;
     bottom: 20px;
