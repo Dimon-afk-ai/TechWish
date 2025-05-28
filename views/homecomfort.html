@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Побутова техніка | TechWish</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="../static/homecomfort.css">
+    <link rel="stylesheet" href="static/homecomfort.css">
 </head>
 <body>
 <?php include('header.html'); ?>
@@ -112,8 +112,8 @@
                     <?php foreach ($products as $product): ?>
                         <div class="product-card">
                             <div class="product-image-container">
-                                <img src="<?php echo htmlspecialchars($product['image_url']); ?>" 
-                                     alt="<?php echo htmlspecialchars($product['name']); ?>" 
+                                <img src="images_home/<?php echo $product['id']; ?>.jpg"
+                                     alt="<?php echo htmlspecialchars($product['name']); ?>"
                                      class="product-image">
                             </div>
                             <div class="product-info">
